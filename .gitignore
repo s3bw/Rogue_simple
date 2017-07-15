@@ -1,0 +1,9 @@
+.DS_Store
+
+# data formats
+*.csv
+*.json
+*.pyc
+
+# jupyter
+.ipynb_checkpoints
