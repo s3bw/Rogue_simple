@@ -1,6 +1,8 @@
 from src.map import Map
 from src.objects import Object, Creature
 
+# TODO: Add gitignore for .pyc files 
+
 moves = {'up': [-1,0],'down': [1,0],'left': [0,-1],'right': [0,1]}
 
 all_objects = []
