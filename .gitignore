@@ -7,3 +7,6 @@
 
 # jupyter
 .ipynb_checkpoints
+
+# session files
+.session
