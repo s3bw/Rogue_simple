@@ -9,14 +9,14 @@ moves = {'up': [-1,0],'down': [1,0],'left': [0,-1],'right': [0,1]}
 all_objects = []
 
 player = Creature(50, 5, creature_death)
-user = Object(5, 5, 'Player Character', creature=player)
+user = Noun(5, 5, 'Player Character', creature=player)
 all_objects.append(user)
 
 rabbit_creature = Creature(10, 0, creature_death)
-rabbit = Object(3, 5, 'Rabbit', creature=rabbit_creature)
+rabbit = Noun(3, 5, 'Rabbit', creature=rabbit_creature)
 all_objects.append(rabbit)
 
-bin = Object(7, 5, 'Bin')
+bin = Noun(7, 5, 'Bin')
 all_objects.append(bin)
 
 map = Map(10, 10)

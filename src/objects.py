@@ -2,7 +2,7 @@ from src.map import Map
 # from src.message import Message
 
 
-class Object:
+class Noun:
     def __init__(self, x, y, name, passable=False, creature=None):
         self.x = x
         self.y = y

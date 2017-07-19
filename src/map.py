@@ -31,7 +31,7 @@ class Map:
             print '| ' + ' | '.join([(
                 str(tile.blocked)) 
                 for tile in grid_y
-            ]) + ' |'            
+            ]) + ' |'
             
     def place_on_grid(self, x, y):
         if self.grid[x][y].blocked == False:
