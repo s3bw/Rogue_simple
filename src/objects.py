@@ -2,23 +2,33 @@ from src.map import Map
 # from src.message import Message
 
 
-class Noun:
-    def __init__(self, x, y, name, passable=False, creature=None):
+class Object_Place:
+    def __init__(self, x, y, grid_level, name, representation, passable=False, creature=None):
         self.x = x
         self.y = y
+        self.grid_level = grid_level
         self.name = name
+        self.representation = representation
+        
         self.passable = passable
         self.creature = creature
         
         if self.creature:
             self.creature.owner = self
             
-    def move(self, grid, dx, dy):
-        if not grid.is_blocked(self.x + dx, self.y + dy):
+    def draw(self):
+        self.grid_level.draw_on_grid(self.x, self.y, self.representation, self.passable)
+            
+    # def send_to_back(self, object_list):
+        # object_list.remove(self)
+        # object_list.insert(0, self)
+        # return object_list
+            
+    def move(self, dx, dy):
+        if not self.grid_level.is_blocked(self.x + dx, self.y + dy):
             self.x += dx
             self.y += dy
-            # if self.name == 'Player Character':
-                # Message.moving_message('Onwards')
+
         
     
 class Creature:
@@ -50,4 +60,5 @@ def creature_death(corpse):
     corpse.creature = None
     corpse.passable = True
     corpse.name = 'Mangled {} corpse.'.format(corpse.name)
+    corpse.representation = '%'
 

@@ -1,7 +1,8 @@
 # '.' and '@' need to be changed to True and False when GUI is added.
 
 class Tile:
-    def __init__(self, blocked=False):
+    def __init__(self, portray='.', blocked=False):
+        self.portray = portray
         self.blocked = blocked
         
 class Map:
@@ -19,28 +20,30 @@ class Map:
                 for x in range(self.grid_v)
             ]
 
-    def show(self):
+    def show(self, show_blocked=False):
         for grid_y in self.grid:
             print '| ' + ' | '.join([(
-                '@' 
-                if tile.blocked else '.') 
+                tile.portray) 
                 for tile in grid_y
             ]) + ' |'
             
-        for grid_y in self.grid:
-            print '| ' + ' | '.join([(
-                str(tile.blocked)) 
-                for tile in grid_y
-            ]) + ' |'
+        if show_blocked:
+            for grid_y in self.grid:
+                print '| ' + ' | '.join([(
+                    str(tile.blocked)) 
+                    for tile in grid_y
+                ]) + ' |'
             
-    def place_on_grid(self, x, y):
-        if self.grid[x][y].blocked == False:
+    def draw_on_grid(self, x, y, representation, passable):
+        self.grid[x][y].portray = representation
+        if not passable:
             self.grid[x][y].blocked = True
         
-    def remove_from_grid(self, x, y):
-        if self.grid[x][y].blocked == True:
-            self.grid[x][y].blocked = False
-        
+    def refresh_grid(self):
+        for x in range(self.grid_h):
+            for y in range(self.grid_v):
+                self.grid[x][y].portray = '.'
+                self.grid[x][y].blocked = False
         
     def is_blocked(self, x, y):
         return self.grid[x][y].blocked
