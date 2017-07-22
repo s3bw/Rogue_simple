@@ -23,18 +23,28 @@ ring = Object_Place(None, None, map, 'Ring Of Power', 'o', item=ring_item, equip
 
 hat_item = Item(weight=2, value=10)
 hat_equip = Equipment('Head', magnitute=20, affect='hp')
-hat = Object_Place(5, 3, map, 'Straw Hat', '^', item=hat_item, equipment=hat_equip)
+hat = Object_Place(None, None, map, 'Straw Hat', '^', item=hat_item, equipment=hat_equip)
 
 bin = Object_Place(7, 5, map, 'Bin', 'b')
 
+#DOOR
+irondoor_door = Door()
+irondoor = Object_Place(5, 6, map, 'Iron Door', '+', door=irondoor_door)
 
-#CREATURES
+
+#PLAYER
 player = Creature(hp=50, power=5, death=creature_death, inventory=[stone], attire=[ring, hat])
 user = Object_Place(5, 5, map, 'Player Character', '@', creature=player)
 user_inventory = user.creature.inventory
 
-rabbit_creature = Creature(hp=1000, power=0, death=creature_death, inventory=[stone, carrot, stone])
+
+#CREATURES
+rabbit_creature = Creature(hp=1000, power=0, death=creature_death, inventory=[carrot])
 rabbit = Object_Place(4, 5, map, 'Rabbit', 'r', creature=rabbit_creature)
+OBJECT_CONTAINER.append(rabbit)
+
+rabbit_creature = Creature(hp=250, power=0, death=creature_death, inventory=[stone, carrot, stone])
+rabbit = Object_Place(3, 4, map, 'Rabbit', 'r', creature=rabbit_creature)
 
 def build_bar(attribute_name, max, current):
     total_bars = 20
@@ -43,8 +53,9 @@ def build_bar(attribute_name, max, current):
     
     print '{}: '.format(attribute_name), '|'*number_of_bars + '+'*number_pluses
 
-OBJECT_CONTAINER.append(hat)
+# OBJECT_CONTAINER.append(hat)
 OBJECT_CONTAINER.append(bin)
+OBJECT_CONTAINER.append(irondoor)
 OBJECT_CONTAINER.append(rabbit)
 OBJECT_CONTAINER.append(user)
 
@@ -53,24 +64,25 @@ def render_map():
     map.refresh_grid()
     for object in OBJECT_CONTAINER:
         if object != user:
-            object.draw()    
+            object.draw()
     
         print (object.x, object.y), object.name, object.representation
 
     user.draw()
     map.show()
 
-    print [k.name for k in user.creature.attire]    
+    print 'Attire: ', [k.name for k in user.creature.attire]    
     print 'Added Power: ', sum(k.equipment.magnitute for k in user.creature.attire if k.equipment.affect == 'hp')
-    print [k.name for k in user.creature.inventory]    
+    print 'Inventory: ', [k.name for k in user.creature.inventory]    
     print 'Net Worth: ', sum(k.item.value for k in user.creature.inventory + user.creature.attire)
     print 'Net Weight: ', sum(k.item.weight for k in user.creature.inventory + user.creature.attire)
     print 'User HP: {}/{}'.format(str(user.creature.hp), str(user.creature.max_hp))
+    print 'Irondoor:', irondoor.door.lock_durability
+    
+    for object in OBJECT_CONTAINER:
+        if object.creature:
+            build_bar(object.name, object.creature.max_hp, object.creature.hp)
 
-    
-    if rabbit.creature:
-        build_bar('rabbit', rabbit.creature.max_hp, rabbit.creature.hp)
-    
     print '-'*41
 
     
@@ -82,19 +94,22 @@ while game_state == True:
     if user_input == 'exit':
         break
         
-    if user_input == 'equip':
+    if user_input == 'close' or user_input == 'c':
+        player_toggle_door(user)
+        
+    if user_input == 'equip' or user_input == 'e':
         player_equip_item(user)
         
     if user_input == 'remove':
         player_remove_item(user)
         
-    if user_input == 'use':
+    if user_input == 'use' or user_input == 'u':
         player_use_item(user)
         
-    if user_input == 'drop':
+    if user_input == 'drop' or user_input == 'd':
         player_drop(user)
         
-    if user_input == 'pick up':
+    if user_input == 'get' or user_input == 'g':
         player_pick_up(user)
         
     if user_input in MOVES:

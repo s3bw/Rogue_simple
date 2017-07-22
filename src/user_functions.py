@@ -30,15 +30,29 @@ def player_move(user, user_input):
     
     target = None
     for object in OBJECT_CONTAINER:
-        if object.creature is not None and object.x == x and object.y == y:
+        valid_target = ((object.door is not None or object.creature is not None) and object.x == x and object.y == y)
+        if valid_target:
             target = object
             break
         
     if target is not None:
-        user.creature.attack(target)
+        if target.creature:
+            user.creature.attack(target)
+            
+        elif not target.door.open:
+            target.door.reduce_durability(user.creature.base_power)
         
+        # Door is open
+        else:
+            user.move(dx, dy)        
     else:
         user.move(dx, dy)
+
+def player_toggle_door(user):
+    area_around_user = [(dx + user.x, dy + user.y) for (dx, dy) in OFF_SETS]
+    for object in OBJECT_CONTAINER:
+        if (object.x, object.y) in area_around_user and object.door:
+            object.door.toggle()
         
         
 def player_equip_item(user):

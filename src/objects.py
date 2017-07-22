@@ -10,7 +10,8 @@ class Object_Place:
             x, y, grid_level, name, representation, passable=False,
             creature=None,
             item=None,
-            equipment=None
+            equipment=None,
+            door=None
         ):
         
         self.x = x
@@ -23,6 +24,7 @@ class Object_Place:
         self.creature = creature
         self.item = item
         self.equipment = equipment
+        self.door = door
         
         if self.creature:
             self.creature.owner = self
@@ -34,6 +36,9 @@ class Object_Place:
         if self.item:
             self.item.owner = self
             self.passable = True
+            
+        if self.door:
+            self.door.owner = self            
             
     def draw(self):
         self.grid_level.draw_on_grid(self.x, self.y, self.representation, self.passable)
@@ -47,6 +52,36 @@ class Object_Place:
             self.x += dx
             self.y += dy
 
+            
+class Door:
+    def __init__(self, lock_strength=0.5, lock_durability=10, open=False):
+        self.lock_durability = lock_durability
+        self.lock_strength = lock_strength
+        self.open = open
+        
+    def reduce_durability(self, damage):
+        damage = damage * self.lock_strength
+        self.lock_durability -= int(damage)
+        if self.lock_durability <= 0:
+            self.open = True
+            self.owner.passable = True
+            self.owner.representation = '-'
+            
+    def toggle(self):
+        if self.lock_durability <= 0:
+            if self.open == False:
+                print 'Openned'
+                self.open = True
+                self.owner.representation = '-'
+                self.owner.passable = True
+            else:
+                print 'Closed'
+                self.open = False
+                self.owner.representation = '+'
+                self.owner.passable = False
+        else:
+            print 'Door is locked.'
+    
     
 class Creature:
     def __init__(self, hp, power, death, inventory=None, attire=None):
