@@ -1,5 +1,7 @@
 from src.map import Map
 from src.containers import OBJECT_CONTAINER
+from src.death_scenes import *
+from src.item_uses import *
 # from src.message import Message
 
 
@@ -42,6 +44,7 @@ class Object_Place:
     
 class Creature:
     def __init__(self, hp, power, death, inventory=None):
+        self.max_hp = hp
         self.hp = hp
         self.power = power
         self.death = death
@@ -73,9 +76,11 @@ class Creature:
         print 'Dropped {}.'.format(highest_value.name)
 
 class Item:
-    def __init__(self, weight, value):
+    def __init__(self, weight, value, intensity=0, has_use=None):
         self.weight = weight
         self.value = value
+        self.intensity = intensity
+        self.has_use = has_use
     
     def pick_up(self):
         OBJECT_CONTAINER.remove(self.owner)
@@ -86,13 +91,14 @@ class Item:
         OBJECT_CONTAINER.append(self.owner)
         self.owner.send_to_back()
         
+    def use(self, use_on):
+        self.has_use(self, use_on.creature)
 
 def creature_death(corpse):
     corpse.creature.drop_item()
-    
     corpse.creature = None
     corpse.passable = True
     corpse.name = 'Mangled {} corpse.'.format(corpse.name)
     corpse.representation = '%'
-    corpse.send_to_back()
+    corpse.send_to_back()        
 
