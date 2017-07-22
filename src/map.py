@@ -29,34 +29,30 @@ class Map:
             for y in range(self.grid_h)]
                 for x in range(self.grid_v)
             ]
-            
         self.grid[10][10].make_wall()
         self.grid[10][9].make_wall()
         self.grid[9][9].make_wall()
-        self.grid[9][10].make_wall()
+        self.grid[10][11].make_wall()
 
-    def show(self, show_blocked=False):
+        
+    def show(self):
         for grid_y in self.grid:
             print '| ' + ' | '.join([(
                 tile.portray) 
                 for tile in grid_y
             ]) + ' |'
             
-        if show_blocked:
-            for grid_y in self.grid:
-                print '| ' + ' | '.join([(
-                    str(tile.blocked)) 
-                    for tile in grid_y
-                ]) + ' |'
             
     def draw_on_grid(self, x, y, representation, passable):
         self.grid[x][y].portray = representation
-        if not passable:
+        if passable == False:
             self.grid[x][y].blocked = True
+        else:
+            self.grid[x][y].blocked = False
         
     def refresh_grid(self):
         objects_on_grid = [(object.x, object.y) for object in OBJECT_CONTAINER if not object.passable]
-
+        print objects_on_grid
         for x in range(self.grid_h):
             for y in range(self.grid_v):
                 if (x, y) not in objects_on_grid and self.grid[x][y].wall_tile == False:

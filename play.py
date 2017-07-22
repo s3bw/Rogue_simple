@@ -27,6 +27,10 @@ hat = Object_Place(None, None, map, 'Straw Hat', '^', item=hat_item, equipment=h
 
 bin = Object_Place(7, 5, map, 'Bin', 'b')
 
+#DOOR
+irondoor_door = Door()
+irondoor = Object_Place(5, 6, map, 'Iron Door', '+', door=irondoor_door)
+
 
 #PLAYER
 player = Creature(hp=50, power=5, death=creature_death, inventory=[stone], attire=[ring, hat])
@@ -51,6 +55,7 @@ def build_bar(attribute_name, max, current):
 
 # OBJECT_CONTAINER.append(hat)
 OBJECT_CONTAINER.append(bin)
+OBJECT_CONTAINER.append(irondoor)
 OBJECT_CONTAINER.append(rabbit)
 OBJECT_CONTAINER.append(user)
 
@@ -72,7 +77,8 @@ def render_map():
     print 'Net Worth: ', sum(k.item.value for k in user.creature.inventory + user.creature.attire)
     print 'Net Weight: ', sum(k.item.weight for k in user.creature.inventory + user.creature.attire)
     print 'User HP: {}/{}'.format(str(user.creature.hp), str(user.creature.max_hp))
-
+    print 'Irondoor:', irondoor.door.lock_durability
+    
     for object in OBJECT_CONTAINER:
         if object.creature:
             build_bar(object.name, object.creature.max_hp, object.creature.hp)
@@ -87,6 +93,9 @@ while game_state == True:
     user_input = raw_input('Where to?')
     if user_input == 'exit':
         break
+        
+    if user_input == 'close' or user_input == 'c':
+        player_toggle_door(user)
         
     if user_input == 'equip' or user_input == 'e':
         player_equip_item(user)
