@@ -97,7 +97,7 @@ class Creature:
             target.creature.take_damage(damage)
             
     def drop_item(self):
-        # include attire in this calculation
+        # include attire in this calculation currently only drops from inventory
         highest_value = max(self.inventory, key=lambda x: x.item.value)
         self.inventory.remove(highest_value)
         highest_value.item.drop(self.owner.x, self.owner.y)
@@ -134,7 +134,10 @@ class Item:
 class Equipment:
     def __init__(self, slot, magnitute, affect=None):
         self.slot = slot
+        # if item is equiped change this to True 
         self.is_equipped = False
+        if self not in OBJECT_CONTAINER:
+            self.is_equipped = True
         
         self.magnitute = magnitute
         self.affect = affect
@@ -151,6 +154,7 @@ class Equipment:
             equipment_already_in_slot.dequip(creature)
             
         self.is_equipped = True
+        creature.inventory.remove(self.owner)
         creature.attire.append(self.owner)
         print 'Now wearing {}.'.format(self.owner.name)
         

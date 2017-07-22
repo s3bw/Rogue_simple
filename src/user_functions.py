@@ -43,21 +43,22 @@ def player_move(user, user_input):
         
 def player_equip_item(user):
     user_inventory = user.creature.inventory
-    user_attire = user.creature.attire
     selected = check_inventory(user_inventory)
-    print selected.name, selected.equipment
     if selected.equipment:
         selected.equipment.toggle_equip(user)
         
+def player_remove_item(user):
+    user_attire = user.creature.attire
+    selected = check_inventory(user_attire)    
+    if selected and selected.equipment:
+        selected.equipment.toggle_equip(user)
         
 def player_drop(user):
     user_inventory = user.creature.inventory
     selected = check_inventory(user_inventory)
-    
     if selected:
         user_inventory.remove(selected)
         selected.item.drop(user.x, user.y)
-
 
 def player_use_item(user):
     user_inventory = user.creature.inventory
@@ -65,7 +66,7 @@ def player_use_item(user):
     
     # Selecting an equipment via USE function.
     if selected.equipment:
-        user_inventory.remove(selected)    
+        user_inventory.remove(selected)
         selected.equipment.toggle_equip(user)
     
     if selected.item.has_use:

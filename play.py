@@ -29,7 +29,7 @@ bin = Object_Place(7, 5, map, 'Bin', 'b')
 
 
 #CREATURES
-player = Creature(hp=50, power=5, death=creature_death, inventory=[stone], attire=[ring])
+player = Creature(hp=50, power=5, death=creature_death, inventory=[stone], attire=[ring, hat])
 user = Object_Place(5, 5, map, 'Player Character', '@', creature=player)
 user_inventory = user.creature.inventory
 
@@ -63,8 +63,8 @@ def render_map():
     print [k.name for k in user.creature.attire]    
     print 'Added Power: ', sum(k.equipment.magnitute for k in user.creature.attire if k.equipment.affect == 'hp')
     print [k.name for k in user.creature.inventory]    
-    print 'Total value: ', sum(k.item.value for k in user.creature.inventory)
-    print 'Total weight: ', sum(k.item.weight for k in user.creature.inventory)
+    print 'Net Worth: ', sum(k.item.value for k in user.creature.inventory + user.creature.attire)
+    print 'Net Weight: ', sum(k.item.weight for k in user.creature.inventory + user.creature.attire)
     print 'User HP: {}/{}'.format(str(user.creature.hp), str(user.creature.max_hp))
 
     
