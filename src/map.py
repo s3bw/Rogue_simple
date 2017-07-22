@@ -48,8 +48,8 @@ class Map:
     def is_blocked(self, x, y):
         return self.grid[x][y].blocked
             
-        # for objects in objects:
-            # if objects.blocks and object.x == x and object.y == y:
+        # for object in objects:
+            # if object.blocks and object.x == x and object.y == y:
                 # return True
                 
         # return False

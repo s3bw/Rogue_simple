@@ -1,58 +1,55 @@
 from src.map import Map
-from src.objects import Object_Place, Creature
+from src.objects import Object_Place, Creature, Item
 from src.objects import creature_death
+from src.containers import *
+from src.item_uses import *
+from src.user_functions import *
 # from src.message import Message
 
 
-moves = {'up': [-1,0],'down': [1,0],'left': [0,-1],'right': [0,1]}
+map = Map(20, 20)
+WORLD_CONTAINER.append(map)
 
-map = Map(10, 10)
+#ITEMS
+stone_item = Item(weight=10, value=0)
+stone = Object_Place(None, None, map, 'Small Stone', 'o', item=stone_item)
 
-all_objects = []
+carrot_item = Item(weight=3, value=5, intensity=0.1, has_use=healing_item)
+carrot = Object_Place(None, None, map, 'Carrot', 'v', item=carrot_item)
 
-player = Creature(50, 5, creature_death)
-user = Object_Place(5, 5, map, 'Player Character', '@', creature=player)
-all_objects.append(user)
-
-rabbit_creature = Creature(10, 0, creature_death)
-rabbit = Object_Place(3, 5, map, 'Rabbit', 'r', creature=rabbit_creature)
-all_objects.append(rabbit)
+hat_item = Item(weight=2, value=10)
+hat = Object_Place(5, 3, map, 'Straw Hat', '^', item=hat_item)
 
 bin = Object_Place(7, 5, map, 'Bin', 'b')
-all_objects.append(bin)
 
+
+#CREATURES
+player = Creature(hp=50, power=5, death=creature_death, inventory=[stone])
+user = Object_Place(5, 5, map, 'Player Character', '@', creature=player)
+user_inventory = user.creature.inventory
+
+rabbit_creature = Creature(hp=10, power=0, death=creature_death, inventory=[stone, carrot, stone])
+rabbit = Object_Place(3, 5, map, 'Rabbit', 'r', creature=rabbit_creature)
+
+
+OBJECT_CONTAINER.append(hat)
+OBJECT_CONTAINER.append(bin)
+OBJECT_CONTAINER.append(rabbit)
+OBJECT_CONTAINER.append(user)
 
 
 def render_map():
     map.refresh_grid()
-    for object in all_objects:
+    for object in OBJECT_CONTAINER:
         if object != user:
             object.draw()    
     
-        print (object.x, object.y)
-        
+        print (object.x, object.y), object.name, object.representation
+
     user.draw()
     map.show()
     print '-'*41
 
-    
-def player_move(user_input):
-    dx, dy = moves[user_input]
-    x = user.x + dx
-    y = user.y + dy
-    
-    target = None
-    for object in all_objects:
-        if object.creature is not None and object.x == x and object.y ==y:
-            target = object
-            break
-        
-    if target is not None:
-        user.creature.attack(target)
-        
-    else:
-        user.move(dx, dy)
-         
     
 game_state = True
 while game_state == True:
@@ -62,9 +59,17 @@ while game_state == True:
     if user_input == 'exit':
         break
         
-    if user_input in moves:
-        player_move(user_input)    
+    if user_input == 'use':
+        player_use_item(user)
+        
+    if user_input == 'drop':
+        player_drop(user)
+        
+    if user_input == 'pick up':
+        player_pick_up(user)
+        
+    if user_input in MOVES:
+        player_move(user, user_input)
+        
 
 
-
-# print map.grid[5][5].blocked
