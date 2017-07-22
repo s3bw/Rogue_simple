@@ -9,7 +9,8 @@ class Object_Place:
     def __init__(self, 
             x, y, grid_level, name, representation, passable=False,
             creature=None,
-            item=None
+            item=None,
+            equipment=None
         ):
         
         self.x = x
@@ -21,9 +22,14 @@ class Object_Place:
         
         self.creature = creature
         self.item = item
+        self.equipment = equipment
         
         if self.creature:
             self.creature.owner = self
+        
+        if self.equipment:
+            self.equipment.owner = self
+            self.passable = True
         
         if self.item:
             self.item.owner = self
@@ -43,12 +49,34 @@ class Object_Place:
 
     
 class Creature:
-    def __init__(self, hp, power, death, inventory=None):
-        self.max_hp = hp
+    def __init__(self, hp, power, death, inventory=None, attire=None):
+        self.base_hp = hp
         self.hp = hp
-        self.power = power
+        self.base_power = power
+        
         self.death = death
         self.inventory = inventory
+        self.attire = attire
+        
+    @property
+    def power(self):
+        if self.attire:
+            bonus = sum(
+                wearing_item.equipment.magnitute 
+                for wearing_item in self.attire if wearing_item.equipment.affect == 'power'
+            )
+            return self.base_power + bonus
+        return self.base_power
+            
+    @property
+    def max_hp(self):
+        if self.attire:
+            bonus = sum(
+                wearing_item.equipment.magnitute 
+                for wearing_item in self.attire if wearing_item.equipment.affect == 'hp'
+            )
+            return self.base_hp + bonus
+        return self.base_hp
         
     def take_damage(self, damage):
         if damage > 0:
@@ -69,12 +97,19 @@ class Creature:
             target.creature.take_damage(damage)
             
     def drop_item(self):
+        # include attire in this calculation currently only drops from inventory
         highest_value = max(self.inventory, key=lambda x: x.item.value)
         self.inventory.remove(highest_value)
         highest_value.item.drop(self.owner.x, self.owner.y)
         
         print 'Dropped {}.'.format(highest_value.name)
+        
+    def is_slot_empty(self, check_slot):
+        for item_in_bag in self.attire:
+            if check_slot == item_in_bag.equipment.slot:
+                return item_in_bag
 
+        
 class Item:
     def __init__(self, weight, value, intensity=0, has_use=None):
         self.weight = weight
@@ -92,7 +127,45 @@ class Item:
         self.owner.send_to_back()
         
     def use(self, use_on):
-        self.has_use(self, use_on.creature)
+        if self.has_use is not None:
+            self.has_use(self, use_on.creature)
+
+        
+class Equipment:
+    def __init__(self, slot, magnitute, affect=None):
+        self.slot = slot
+        # if item is equiped change this to True 
+        self.is_equipped = False
+        if self not in OBJECT_CONTAINER:
+            self.is_equipped = True
+        
+        self.magnitute = magnitute
+        self.affect = affect
+        
+    def toggle_equip(self, unit):
+        if self.is_equipped:
+            self.dequip(unit.creature)
+        else:
+            self.equip(unit.creature)
+            
+    def equip(self, creature):
+        equipment_already_in_slot = creature.is_slot_empty(self.slot)
+        if equipment_already_in_slot:
+            equipment_already_in_slot.dequip(creature)
+            
+        self.is_equipped = True
+        creature.inventory.remove(self.owner)
+        creature.attire.append(self.owner)
+        print 'Now wearing {}.'.format(self.owner.name)
+        
+    def dequip(self, creature):        
+        if not self.is_equipped:
+            return
+        self.is_equipped = False
+        creature.attire.remove(self.owner)
+        creature.inventory.append(self.owner)
+        print 'Taken {} off.'.format(self.owner.name)
+        
 
 def creature_death(corpse):
     corpse.creature.drop_item()

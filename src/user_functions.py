@@ -8,19 +8,19 @@ MOVES = {
     'right': [0,1]
 }
 
-def check_inventory(user_inventory):
-    if len(user_inventory) > 1:
+def check_inventory(inventory_list):
+    if len(inventory_list) > 1:
         print 'Select an item.'
-        for index, item_in_bag in enumerate(user_inventory):
+        for index, item_in_bag in enumerate(inventory_list):
             print '{}. {}'.format(index, item_in_bag.name)
         selected_item = raw_input('Item: ')
         
-        for item_in_bag in user_inventory:
+        for item_in_bag in inventory_list:
             if selected_item == item_in_bag.name:
                 return item_in_bag
                 
-    elif user_inventory:
-        last_item = user_inventory[0]
+    elif inventory_list:
+        last_item = inventory_list[0]
         return last_item
 
 def player_move(user, user_input):
@@ -41,21 +41,38 @@ def player_move(user, user_input):
         user.move(dx, dy)
         
         
+def player_equip_item(user):
+    user_inventory = user.creature.inventory
+    selected = check_inventory(user_inventory)
+    if selected.equipment:
+        selected.equipment.toggle_equip(user)
+        
+def player_remove_item(user):
+    user_attire = user.creature.attire
+    selected = check_inventory(user_attire)    
+    if selected and selected.equipment:
+        selected.equipment.toggle_equip(user)
+        
 def player_drop(user):
     user_inventory = user.creature.inventory
     selected = check_inventory(user_inventory)
-    
-    user_inventory.remove(selected)
-    selected.item.drop(user.x, user.y)
-
+    if selected:
+        user_inventory.remove(selected)
+        selected.item.drop(user.x, user.y)
 
 def player_use_item(user):
     user_inventory = user.creature.inventory
     selected = check_inventory(user_inventory)
     
+    # Selecting an equipment via USE function.
+    if selected.equipment:
+        user_inventory.remove(selected)
+        selected.equipment.toggle_equip(user)
+    
     if selected.item.has_use:
         user_inventory.remove(selected)
         selected.item.use(user)
+
         
 def player_pick_up(user):
     user_inventory = user.creature.inventory
