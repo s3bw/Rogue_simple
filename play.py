@@ -8,6 +8,38 @@ from src.user_functions import *
 
 
 map = Map(20, 20)
+
+carrot_item = Item(weight=3, value=5, intensity=0.1, has_use=healing_item)
+carrot = Object_Place(None, None, map, 'Carrot', 'v', item=carrot_item)
+
+hat_item = Item(weight=2, value=10)
+hat_equip = Equipment('Head', magnitute=20, affect='hp')
+hat = Object_Place(None, None, map, 'Straw Hat', '^', item=hat_item, equipment=hat_equip)
+
+for building in map.rooms:
+    for (x, y) in building.room.door_space:
+        if building.room.value > 80:
+            steel_door = Door(lock_strength=0.5, lock_durability=20)
+            steeldoor = Object_Place(x, y, map, 'Bolted Door', '+', door=steel_door)
+            OBJECT_CONTAINER.append(steeldoor)
+        
+        else:
+            wood_door = Door(lock_strength=0.8, lock_durability=4)
+            wooddoor = Object_Place(x, y, map, 'Wood Door', '+', door=wood_door)
+            OBJECT_CONTAINER.append(wooddoor)
+        
+    for (x, y) in building.room.object_space:
+        if building.room.value > 80:
+            rabbit_creature = Creature(hp=1000, power=0, death=creature_death, inventory=[carrot])
+            rabbit = Object_Place(x, y, map, 'Fat Rabbit', 'R', creature=rabbit_creature)
+            OBJECT_CONTAINER.append(rabbit)
+            
+        else:
+            rabbit_creature = Creature(hp=200, power=0, death=creature_death, attire=[hat])
+            rabbit = Object_Place(x, y, map, 'Rabbit', 'r', creature=rabbit_creature)
+            OBJECT_CONTAINER.append(rabbit)
+
+
 WORLD_CONTAINER.append(map)
 
 #ITEMS
@@ -30,6 +62,7 @@ bin = Object_Place(7, 5, map, 'Bin', 'b')
 #DOOR
 irondoor_door = Door()
 irondoor = Object_Place(5, 6, map, 'Iron Door', '+', door=irondoor_door)
+
 
 
 #PLAYER
@@ -78,6 +111,7 @@ def render_map():
     print 'Net Weight: ', sum(k.item.weight for k in user.creature.inventory + user.creature.attire)
     print 'User HP: {}/{}'.format(str(user.creature.hp), str(user.creature.max_hp))
     print 'Irondoor:', irondoor.door.lock_durability
+    print 'wooddoor:', wooddoor.door.lock_durability
     
     for object in OBJECT_CONTAINER:
         if object.creature:

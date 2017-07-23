@@ -37,6 +37,9 @@ class Rect:
         
     def rectangle(self, x, y):
         return (self.x1 <= x <= self.x2 and self.y1 <= y <= self.y2)
+
+    def internal(self, x, y):
+        return (self.x1 < x < self.x2 and self.y1 < y < self.y2)
         
     def edges(self, x, y):
         return (self.x1 == x and self.y1 <= y <= self.y2) \
@@ -51,14 +54,33 @@ class Rect:
             or (self.y2 == y and self.x1 < x < self.x2)
         
 class Room:
-    def __init__(self, doors=None, value=0):
+    def __init__(self, grid, value=0, room_objects=None, doors=None):
         self.value = value
+        self.doors = doors
+        self.room_objects = room_objects
+        
+        grid_h = range(grid.grid_h)
+        grid_v = range(grid.grid_v)
+        self.grid_space = [ (x, y) for x in range(grid.grid_h) for y in range(grid.grid_v)]
+        
         if value > 50:
             self.doors = 1
+            self.room_objects = 1
             
-        self.doors = doors
-            
+    def allocate_spaces(self, space, allocate_item):
+        potential_spaces = len(space) - 1
+        space_index = [random.randint(1, potential_spaces) for n in range(allocate_item)]
+        return [space[index] for index in space_index]
         
+    def define_spaces(self):        
+        door_space = [(x, y) for (x, y) in self.grid_space if self.owner.sides(x, y)]
+        self.door_space = self.allocate_spaces(door_space, self.doors)
+        
+        object_space = [(x, y) for (x, y) in self.grid_space if self.owner.internal(x, y)]
+        self.object_space = self.allocate_spaces(object_space, self.room_objects)
+        del self.grid_space
+
+
         
 class Tile:
     def __init__(self, wall_tile, portray='.', blocked=False):    
@@ -76,7 +98,7 @@ class Tile:
         
         
 class Map:
-    def __init__(self, grid_h, grid_v, grid=None):
+    def __init__(self, grid_h, grid_v):
         self.grid_h = grid_h
         self.grid_v = grid_v
         self.grid_area = self.grid_h * self.grid_v
@@ -90,25 +112,23 @@ class Map:
                 for y in range(self.grid_v)
             ]
 
-        rooms = []
+        self.rooms = []
         space_for_rooms = (self.grid_area*(1- WALKING_AREA)) / ROOM_AREA
         while space_for_rooms > 1:
             space_for_rooms -= 1
             
             room_h = room_length()
             room_v = room_length()
-            new_room = self.create_room(rooms, room_h, room_v)
-            rooms.append(new_room)
+            new_room = self.create_room(self.rooms, room_h, room_v)
+            self.rooms.append(new_room)
         
         for y in range(self.grid_h):
             for x in range(self.grid_v):
-                if any(room.edges(x,y) for room in rooms):
+                if any(map_object.edges(x,y) and (x,y) not in map_object.room.door_space for map_object in self.rooms):
                     self.grid[x][y].make_wall()
                     
-        # Include placement of Objects in map creation.
-        # Include type of map gen - above ground/below
+        # Include types of maps gen - above ground/below
             
-
     def create_room(self, rooms, new_h, new_v):
         max_x = self.grid_h - new_h - 1
         max_y = self.grid_v - new_v - 1
@@ -118,10 +138,13 @@ class Map:
             new_x = random.randint(5, max_x)
             new_y = random.randint(5, max_y)
             
-            room_component = Room()
-            room = Rect(new_x, new_y, new_h, new_v, room=room_component)
-            if not any(created_room.intersect(room) for created_room in rooms):
-                return room
+            new_value = random.randint(0,100)
+            room_component = Room(self, value=new_value, doors=2, room_objects=2)
+            map_object = Rect(new_x, new_y, new_h, new_v, room=room_component)
+            
+            if not any(created_room.intersect(map_object) for created_room in rooms):
+                map_object.room.define_spaces()
+                return map_object
         
     def show(self):
         for grid_y in self.grid:
@@ -140,7 +163,7 @@ class Map:
         
     def refresh_grid(self):
         objects_on_grid = [(object.x, object.y) for object in OBJECT_CONTAINER if not object.passable]
-        print objects_on_grid
+
         for x in range(self.grid_h):
             for y in range(self.grid_v):
                 if (x, y) not in objects_on_grid and self.grid[x][y].wall_tile == False:

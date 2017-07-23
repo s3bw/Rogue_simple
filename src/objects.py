@@ -133,11 +133,12 @@ class Creature:
             
     def drop_item(self):
         # include attire in this calculation currently only drops from inventory
-        highest_value = max(self.inventory, key=lambda x: x.item.value)
-        self.inventory.remove(highest_value)
-        highest_value.item.drop(self.owner.x, self.owner.y)
+        if self.inventory:
+            highest_value = max(self.inventory, key=lambda x: x.item.value)
+            self.inventory.remove(highest_value)
+            highest_value.item.drop(self.owner.x, self.owner.y)
         
-        print 'Dropped {}.'.format(highest_value.name)
+            print 'Dropped {}.'.format(highest_value.name)
         
     def is_slot_empty(self, check_slot):
         for item_in_bag in self.attire:
@@ -169,8 +170,9 @@ class Item:
 class Equipment:
     def __init__(self, slot, magnitute, affect=None):
         self.slot = slot
-        # if item is equiped change this to True 
         self.is_equipped = False
+        
+        # I think this assumption is valid
         if self not in OBJECT_CONTAINER:
             self.is_equipped = True
         
@@ -209,4 +211,3 @@ def creature_death(corpse):
     corpse.name = 'Mangled {} corpse.'.format(corpse.name)
     corpse.representation = '%'
     corpse.send_to_back()        
-
