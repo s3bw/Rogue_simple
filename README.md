@@ -17,3 +17,4 @@ A classic Roguelike
  - Need to Drop items from attire, not just inventory.
  - hp increasing items need to do % based increases - this is to aid Creatures with less than max Health.
  - a second type of map gen - play.py is becoming a level gen module.
+ - Usable items need methods of use (eat, drink, throw)
