@@ -7,6 +7,8 @@ A classic Roguelike
 - Attack-Targeting [6,5]
 - Map-gen round 2 [8,10]
 - ai [6,4]
+- Distance to calculation [3,3]
+    --> Use to build bars of objects nearby. [2,1]
 
 ## To Fix/Do:
 
