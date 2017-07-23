@@ -8,5 +8,8 @@
 # jupyter
 .ipynb_checkpoints
 
+#pictures
+.PNG
+
 # session files
 .session
