@@ -1,6 +1,6 @@
 import math
 import random
-from src.containers import *
+from containers import *
 
 MAX_SIZE_ROOM = 7
 MIN_SIZE_ROOM = 4
@@ -61,7 +61,7 @@ class Room:
         
         grid_h = range(grid.grid_h)
         grid_v = range(grid.grid_v)
-        self.grid_space = [ (x, y) for x in range(grid.grid_h) for y in range(grid.grid_v)]
+        self.grid_space = [ (x, y) for x in grid_h for y in grid_v]
         
         if value > 50:
             self.doors = 1
@@ -97,11 +97,13 @@ class Tile:
         # self.block_sight = True
         
         
-class Map:
-    def __init__(self, grid_h, grid_v):
+class Grid:
+    def __init__(self, grid_h, grid_v, grid_biome='village'):
         self.grid_h = grid_h
         self.grid_v = grid_v
         self.grid_area = self.grid_h * self.grid_v
+        
+        self.biome = grid_biome
         
         self.create_grid()
         
@@ -112,15 +114,23 @@ class Map:
                 for y in range(self.grid_v)
             ]
 
+        calculate_space =  (self.grid_area*(1- WALKING_AREA)) / ROOM_AREA
+        
         self.rooms = []
-        space_for_rooms = (self.grid_area*(1- WALKING_AREA)) / ROOM_AREA
+        space_for_rooms = calculate_space
         while space_for_rooms > 1:
-            space_for_rooms -= 1
-            
             room_h = room_length()
             room_v = room_length()
             new_room = self.create_room(self.rooms, room_h, room_v)
-            self.rooms.append(new_room)
+            
+            if new_room == False:
+                print 'Map Rejected'
+                self.rooms = []
+                space_for_rooms = calculate_space
+            
+            else:
+                space_for_rooms -= 1                
+                self.rooms.append(new_room)
         
         for y in range(self.grid_h):
             for x in range(self.grid_v):
@@ -133,8 +143,14 @@ class Map:
         max_x = self.grid_h - new_h - 1
         max_y = self.grid_v - new_v - 1
         
+        attempts = 0
         valid_room = False
         while valid_room == False:
+        
+            attempts += 1
+            if attempts == 20:
+                return False
+            
             new_x = random.randint(5, max_x)
             new_y = random.randint(5, max_y)
             
@@ -145,6 +161,7 @@ class Map:
             if not any(created_room.intersect(map_object) for created_room in rooms):
                 map_object.room.define_spaces()
                 return map_object
+                
         
     def show(self):
         for grid_y in self.grid:

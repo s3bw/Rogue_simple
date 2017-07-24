@@ -1,83 +1,34 @@
-from src.map import Map
-from src.objects import Object_Place, Creature, Item
-from src.objects import creature_death
-from src.containers import *
-from src.item_uses import *
+import src.generate_map as map_gen
+
+from src.containers import OBJECT_CONTAINER
+from src.containers import WORLD_CONTAINER
+
+from src.objects import *
 from src.user_functions import *
 # from src.message import Message
 
+map_gen.generate(20, 20, 'village')
 
-map = Map(20, 20)
-
-carrot_item = Item(weight=3, value=5, intensity=0.1, has_use=healing_item)
-carrot = Object_Place(None, None, map, 'Carrot', 'v', item=carrot_item)
-
-hat_item = Item(weight=2, value=10)
-hat_equip = Equipment('Head', magnitute=20, affect='hp')
-hat = Object_Place(None, None, map, 'Straw Hat', '^', item=hat_item, equipment=hat_equip)
-
-for building in map.rooms:
-    for (x, y) in building.room.door_space:
-        if building.room.value > 80:
-            steel_door = Door(lock_strength=0.5, lock_durability=20)
-            steeldoor = Object_Place(x, y, map, 'Bolted Door', '+', door=steel_door)
-            OBJECT_CONTAINER.append(steeldoor)
-        
-        else:
-            wood_door = Door(lock_strength=0.8, lock_durability=4)
-            wooddoor = Object_Place(x, y, map, 'Wood Door', '+', door=wood_door)
-            OBJECT_CONTAINER.append(wooddoor)
-        
-    for (x, y) in building.room.object_space:
-        if building.room.value > 80:
-            rabbit_creature = Creature(hp=1000, power=0, death=creature_death, inventory=[carrot])
-            rabbit = Object_Place(x, y, map, 'Fat Rabbit', 'R', creature=rabbit_creature)
-            OBJECT_CONTAINER.append(rabbit)
-            
-        else:
-            rabbit_creature = Creature(hp=200, power=0, death=creature_death, attire=[hat])
-            rabbit = Object_Place(x, y, map, 'Rabbit', 'r', creature=rabbit_creature)
-            OBJECT_CONTAINER.append(rabbit)
-
-
-WORLD_CONTAINER.append(map)
-
-#ITEMS
-stone_item = Item(weight=10, value=0)
-stone = Object_Place(None, None, map, 'Small Stone', 's', item=stone_item)
-
-carrot_item = Item(weight=3, value=5, intensity=0.1, has_use=healing_item)
-carrot = Object_Place(None, None, map, 'Carrot', 'v', item=carrot_item)
-
-ring_item = Item(weight=2, value=30)
-ring_equip = Equipment('Finger', magnitute=78, affect='power')
-ring = Object_Place(None, None, map, 'Ring Of Power', 'o', item=ring_item, equipment=ring_equip)
-
-hat_item = Item(weight=2, value=10)
-hat_equip = Equipment('Head', magnitute=20, affect='hp')
-hat = Object_Place(None, None, map, 'Straw Hat', '^', item=hat_item, equipment=hat_equip)
-
-bin = Object_Place(7, 5, map, 'Bin', 'b')
-
-#DOOR
-irondoor_door = Door()
-irondoor = Object_Place(5, 6, map, 'Iron Door', '+', door=irondoor_door)
-
-
+depth_index = 0
+current_area = WORLD_CONTAINER[depth_index]
 
 #PLAYER
-player = Creature(hp=50, power=5, death=creature_death, inventory=[stone], attire=[ring, hat])
-user = Object_Place(5, 5, map, 'Player Character', '@', creature=player)
-user_inventory = user.creature.inventory
+long_sword_item = Item(weight=5, value=60)
+sword_equip = Equipment('Hand', magnitute=125, affect='power')
+sword = Object_Place(5, 6, current_area, 'Long Sword', '/', item=long_sword_item, equipment=sword_equip)
+OBJECT_CONTAINER.append(sword)
 
+long_sword_item = Item(weight=5, value=60)
+sword_equip = Equipment('Hand', magnitute=125, affect='power')
+sword = Object_Place(None, None, current_area, 'Long Sword', '/', item=long_sword_item, equipment=sword_equip)
+# OBJECT_CONTAINER.append(sword)
 
-#CREATURES
-rabbit_creature = Creature(hp=1000, power=0, death=creature_death, inventory=[carrot])
-rabbit = Object_Place(4, 5, map, 'Rabbit', 'r', creature=rabbit_creature)
-OBJECT_CONTAINER.append(rabbit)
+player = Creature(hp=50, power=5, death=creature_death, inventory=[], attire=[sword])
+user = Object_Place(5, 5, current_area, 'Player Character', '@', creature=player)
+OBJECT_CONTAINER.append(user)
 
-rabbit_creature = Creature(hp=250, power=0, death=creature_death, inventory=[stone, carrot, stone])
-rabbit = Object_Place(3, 4, map, 'Rabbit', 'r', creature=rabbit_creature)
+print [n.name for n in OBJECT_CONTAINER]
+print sword.equipment.is_equipped
 
 def build_bar(attribute_name, max, current):
     total_bars = 20
@@ -86,15 +37,11 @@ def build_bar(attribute_name, max, current):
     
     print '{}: '.format(attribute_name), '|'*number_of_bars + '+'*number_pluses
 
-# OBJECT_CONTAINER.append(hat)
-OBJECT_CONTAINER.append(bin)
-OBJECT_CONTAINER.append(irondoor)
-OBJECT_CONTAINER.append(rabbit)
-OBJECT_CONTAINER.append(user)
-
 
 def render_map():
-    map.refresh_grid()
+
+    
+    current_area.refresh_grid()
     for object in OBJECT_CONTAINER:
         if object != user:
             object.draw()
@@ -102,16 +49,14 @@ def render_map():
         print (object.x, object.y), object.name, object.representation
 
     user.draw()
-    map.show()
+    current_area.show()
 
     print 'Attire: ', [k.name for k in user.creature.attire]    
-    print 'Added Power: ', sum(k.equipment.magnitute for k in user.creature.attire if k.equipment.affect == 'hp')
+    print 'Added Power: ', sum(k.equipment.magnitute for k in user.creature.attire if k.equipment.affect == 'power')
     print 'Inventory: ', [k.name for k in user.creature.inventory]    
     print 'Net Worth: ', sum(k.item.value for k in user.creature.inventory + user.creature.attire)
     print 'Net Weight: ', sum(k.item.weight for k in user.creature.inventory + user.creature.attire)
     print 'User HP: {}/{}'.format(str(user.creature.hp), str(user.creature.max_hp))
-    print 'Irondoor:', irondoor.door.lock_durability
-    print 'wooddoor:', wooddoor.door.lock_durability
     
     for object in OBJECT_CONTAINER:
         if object.creature:
@@ -119,7 +64,7 @@ def render_map():
 
     print '-'*41
 
-    
+# key presses 
 game_state = True
 while game_state == True:
     render_map()

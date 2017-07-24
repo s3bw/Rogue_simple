@@ -1,7 +1,6 @@
-from src.map import Map
-from src.containers import OBJECT_CONTAINER
-from src.death_scenes import *
-from src.item_uses import *
+from containers import OBJECT_CONTAINER
+from death_scenes import *
+from item_uses import *
 # from src.message import Message
 
 
@@ -60,7 +59,7 @@ class Door:
         self.open = open
         
     def reduce_durability(self, damage):
-        damage = damage * self.lock_strength
+        damage = damage * (1 - self.lock_strength)
         self.lock_durability -= int(damage)
         if self.lock_durability <= 0:
             self.open = True
@@ -82,6 +81,12 @@ class Door:
         else:
             print 'Door is locked.'
     
+
+equip_bonus = lambda entity, attribute: sum(
+    wearing_item.equipment.magnitute 
+    for wearing_item in entity.attire 
+    if wearing_item.equipment.affect == attribute
+)
     
 class Creature:
     def __init__(self, hp, power, death, inventory=None, attire=None):
@@ -96,21 +101,13 @@ class Creature:
     @property
     def power(self):
         if self.attire:
-            bonus = sum(
-                wearing_item.equipment.magnitute 
-                for wearing_item in self.attire if wearing_item.equipment.affect == 'power'
-            )
-            return self.base_power + bonus
+            return self.base_power + equip_bonus(self, 'power')
         return self.base_power
             
     @property
     def max_hp(self):
         if self.attire:
-            bonus = sum(
-                wearing_item.equipment.magnitute 
-                for wearing_item in self.attire if wearing_item.equipment.affect == 'hp'
-            )
-            return self.base_hp + bonus
+            return self.base_hp + equip_bonus(self, 'hp')
         return self.base_hp
         
     def take_damage(self, damage):
@@ -172,23 +169,45 @@ class Equipment:
         self.slot = slot
         self.is_equipped = False
         
-        # I think this assumption is valid
-        if self not in OBJECT_CONTAINER:
+        self.magnitute = magnitute
+        self.affect = affect        
+                    
+        # if object is in attire when generating the game it gets equiped value False.
+        # This is not the case as it's in a creatures attire 
+
+        all_attire = [entity.creature.attire for entity in OBJECT_CONTAINER if entity.creature]
+        if self not in OBJECT_CONTAINER and (self in all_attire):
             self.is_equipped = True
         
-        self.magnitute = magnitute
-        self.affect = affect
+    # @property
+    # def is_equipped(self):
+        # return self._is_equipped
+        
+    # @is_equipped.setter
+    # def is_equipped(self):
+        # global_attire = [
+            # dressed.creature.attire 
+            # for dressed in OBJECT_CONTAINER 
+            # if dressed.creature is not None
+        # ]
+        
+        # self._is_equipped = (self in global_attire)
+        
+#        if self in global_attire:
+  #          self.is_equipped = True
+        
         
     def toggle_equip(self, unit):
+        print self.owner.name, 'equipt?', self.is_equipped
         if self.is_equipped:
             self.dequip(unit.creature)
         else:
             self.equip(unit.creature)
             
     def equip(self, creature):
-        equipment_already_in_slot = creature.is_slot_empty(self.slot)
-        if equipment_already_in_slot:
-            equipment_already_in_slot.dequip(creature)
+        equipment_in_slot = creature.is_slot_empty(self.slot)
+        if equipment_in_slot:
+            equipment_in_slot.equipment.dequip(creature)
             
         self.is_equipped = True
         creature.inventory.remove(self.owner)

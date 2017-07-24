@@ -1,4 +1,4 @@
-from src.objects import *
+from objects import *
 
 def healing_item(item_used, creature_using_item):
     heal = int(creature_using_item.max_hp * item_used.intensity)
