@@ -1,5 +1,5 @@
-from src.containers import *
-from src.objects import *
+from containers import *
+from objects import *
 
 MOVES = {
     'up': [-1,0],
@@ -58,18 +58,21 @@ def player_toggle_door(user):
 def player_equip_item(user):
     user_inventory = user.creature.inventory
     selected = check_inventory(user_inventory)
-    if selected.equipment:
+    
+    if selected and selected.equipment:
         selected.equipment.toggle_equip(user)
         
 def player_remove_item(user):
     user_attire = user.creature.attire
-    selected = check_inventory(user_attire)    
+    selected = check_inventory(user_attire)
+    
     if selected and selected.equipment:
         selected.equipment.toggle_equip(user)
         
 def player_drop(user):
     user_inventory = user.creature.inventory
     selected = check_inventory(user_inventory)
+    
     if selected:
         user_inventory.remove(selected)
         selected.item.drop(user.x, user.y)
@@ -79,11 +82,11 @@ def player_use_item(user):
     selected = check_inventory(user_inventory)
     
     # Selecting an equipment via USE function.
-    if selected.equipment:
-        user_inventory.remove(selected)
+    if selected and selected.equipment:
+        # user_inventory.remove(selected)
         selected.equipment.toggle_equip(user)
     
-    if selected.item.has_use:
+    if selected and selected.item.has_use:
         user_inventory.remove(selected)
         selected.item.use(user)
 
