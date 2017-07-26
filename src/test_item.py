@@ -1,5 +1,10 @@
-from objects import *
 import random
+
+from objects import *
+import data.materials as mats
+
+metal_value = mats.Metal_Data['metal']
+
 # have material tree:
 # e.g.     --> Metals:
 #                 |\
@@ -54,11 +59,12 @@ representation_dict = {
     'head': '^'
 }
 
+# clothing effect defence, while weapon effects power
 def clothing(name, slot, material, tier=1, affect='defense'):
-    # Can define by tier.
+    # Can define by tier. - tier should become rarity
     material_value = material_values[material]
     value = 10*tier*(material_value/2)
-    magnitute = limb_priority[slot]*tier
+    magnitute = limb_priority[slot]
     weight = limb_dict[slot] * material_weights[material]
     representation = representation_dict[slot]
     name = '{} {}'.format(material, name).capitalize()
@@ -67,12 +73,12 @@ def clothing(name, slot, material, tier=1, affect='defense'):
     clothing_equipment = Equipment(slot, magnitute, affect)
     clothing = Object_Place(None, None, None, name, '^', item=clothing_item, equipment=clothing_equipment)
     return clothing
-  
+
 #  
 # def player(attributes for player):
 #    return user
 #
-    
+
 
 list_materials = ['wool', 'steel', 'gold']
 list_items = [['helmet', 'head'], ['cap', 'head'], ['pants', 'legs']]
