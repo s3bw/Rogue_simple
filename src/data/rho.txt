@@ -1,17 +1,9 @@
 material,value,weight,rarity,strength,special
-oak, 5, 7, 5, 8
-maple,6, 6, 6, 7, shock_resistant
-mahogany,  8, 6, 7, 5, varying strength
-cherry,7, 5, 6, 5
-rosewood,8, 6, 7, 6, dark
-teak,9, 8, 7, 7
-ash,4, 8, 5, 5
-pine,4, 3, 4, 4, water resistant 
-hickory,4, 8, 4, 6
-beech,5, 7, 5, 7
-birch,9, 7, 7, 5
-cedar,4, 4, 5, 3, aromatic
-redwood,8, 7, 9, 6, resistant to everything 
-hemlock,3, 4, 5, 7
-fir,3, 5, 5, 3
-spruce,3, 6, 3, 6
+cotton,7, 3, 6, 6, "many resistances" 
+silk,8, 2, 7, 6
+linen,5, 3, 5, 7
+wool,6, 5, 5, 8, "warm"
+leather,8, 6, 6, 8
+ramie,4, 4, 3, 7
+hemp,5, 4, 3, 6
+jute,6, 4, 6, 7, "helps carrying"
