@@ -30,6 +30,7 @@ OBJECT_CONTAINER.append(user)
 print [n.name for n in OBJECT_CONTAINER]
 print sword.equipment.is_equipped
 
+
 def build_bar(attribute_name, max, current):
     total_bars = 20
     number_of_bars = int(float(current)/float(max) * total_bars)
@@ -39,7 +40,6 @@ def build_bar(attribute_name, max, current):
 
 
 def render_map():
-
     
     current_area.refresh_grid()
     for object in OBJECT_CONTAINER:
@@ -64,6 +64,7 @@ def render_map():
 
     print '-'*41
 
+    
 # key presses 
 game_state = True
 while game_state == True:

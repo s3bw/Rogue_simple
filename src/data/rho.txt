@@ -1,9 +1,0 @@
-material,value,weight,rarity,strength,special
-cotton,7, 3, 6, 6, "many resistances" 
-silk,8, 2, 7, 6
-linen,5, 3, 5, 7
-wool,6, 5, 5, 8, "warm"
-leather,8, 6, 6, 8
-ramie,4, 4, 3, 7
-hemp,5, 4, 3, 6
-jute,6, 4, 6, 7, "helps carrying"

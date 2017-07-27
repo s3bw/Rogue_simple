@@ -1,16 +1,11 @@
 import random
 
 from objects import *
-import data.materials as mats
+import data.materials as mat
 
-metal_value = mats.Metal_Data['metal']
 
-# have material tree:
-# e.g.     --> Metals:
-#                 |\
-#                 \ - Gold
-#                  - Steel
-#
+
+# https://gamedev.stackexchange.com/questions/85871/how-should-loot-be-distributed-across-dungeon-levels
 # if head & Metal = Helmet
 # if head & Wool = Cap
 #  Then mention material + item:
@@ -24,23 +19,17 @@ metal_value = mats.Metal_Data['metal']
 #    --> e.g. tier 1: ^
 #    --> e.g. tier 2: n
 #    --> e.g. tier 3: M
-#
-# Weapons blunt/sharp edge?
-#
-#
-#
-#
 
-material_weights = {
-    'wool': 2,
-    'steel': 10,
-    'gold': 8
+veg_intensity_dict = {
+    'carrot': 0.1,
+    'potatoe': 0.5,
+    'pumpkin': 0.4
 }
 
-material_values = {
-    'wool': 2,
-    'steel': 5,
-    'gold': 15
+veg_wieght_dict = {
+    'carrot': 2,
+    'potatoe': 3,
+    'pumpkin': 4
 }
 
 limb_dict = {
@@ -59,6 +48,40 @@ representation_dict = {
     'head': '^'
 }
 
+animal_dict = {
+    'rabbit': {'size': 2, 'carries': ['veg'], 'strength':0, 'representation': 'r'},    
+    'bird': {'size': 1, 'carries': ['pumpkin'], 'strength':0, 'representation': 'm'}
+}
+
+
+def create_tame_animal(x, y, map_area):
+    animals = animal_dict.keys()
+    animal = random.choice(animals)
+    
+    hp = animal_dict[animal]['size']*100
+    power = animal_dict[animal]['strength']
+    representation = animal_dict[animal]['representation']
+    
+    # Create Item to carry
+
+    animal_object = Creature(hp=hp, power=power, death=creature_death) #, inventory=[carrot])
+    final_animal = Object_Place(x, y, map_area, animal, representation, creature=animal_object)
+    return final_animal
+
+def create_door(x, y, map_area):
+    # Add wood
+    materials = mat.Metal_Data['metals'].keys()
+    material = random.choice(materials)
+    
+    name = '{} door'.format(material)
+    strength = float(mat.Metal_Data['metals'][material]['strength'])/10.
+    weight = mat.Metal_Data['metals'][material]['weight']*10
+    
+    door_object = Door(lock_strength=strength, lock_durability=weight)
+    final_door = Object_Place(x, y, map_area, name, '+', door=door_object)
+    return final_door
+    
+"""
 # clothing effect defence, while weapon effects power
 def clothing(name, slot, material, tier=1, affect='defense'):
     # Can define by tier. - tier should become rarity
@@ -101,3 +124,4 @@ print 'Tier: ', tier
 print 'Value', 'Weight', 'Name'
 print gen_item.item.value, gen_item.item.weight, gen_item.name
 print 'Usefulness: ', gen_item.equipment.magnitute
+"""
