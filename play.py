@@ -12,16 +12,10 @@ map_gen.generate(20, 20, 'village')
 depth_index = 0
 current_area = WORLD_CONTAINER[depth_index]
 
-#PLAYER
-long_sword_item = Item(weight=5, value=60)
-sword_equip = Equipment('Hand', magnitute=125, affect='power')
-sword = Object_Place(5, 6, current_area, 'Long Sword', '/', item=long_sword_item, equipment=sword_equip)
-OBJECT_CONTAINER.append(sword)
-
+#PLAYER and PLAYER ITEMS
 long_sword_item = Item(weight=5, value=60)
 sword_equip = Equipment('Hand', magnitute=125, affect='power')
 sword = Object_Place(None, None, current_area, 'Long Sword', '/', item=long_sword_item, equipment=sword_equip)
-# OBJECT_CONTAINER.append(sword)
 
 player = Creature(hp=50, power=5, death=creature_death, inventory=[], attire=[sword])
 user = Object_Place(5, 5, current_area, 'Player Character', '@', creature=player)
