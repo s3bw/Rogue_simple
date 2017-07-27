@@ -1,3 +1,21 @@
+
+```
+ https://gamedev.stackexchange.com/questions/85871/how-should-loot-be-distributed-across-dungeon-levels
+ if head & Metal = Helmet
+ if head & Wool = Cap
+  Then mention material + item:
+   Gold Helmet/ Steel Helmet
+
+ Primary Materials have defence/offense attribute:
+ e.g.   50, if gold 50 * 0.2
+ 
+            if steel 50 * 0.9
+
+ representation based on class
+    --> e.g. tier 1: ^
+    --> e.g. tier 2: n
+    --> e.g. tier 3: M
+```
 # Metals
 
 Metal
