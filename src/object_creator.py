@@ -1,66 +1,24 @@
 import random
 
 from objects import *
+from item_uses import *
 import data.materials as mat
+import data.animals as ani
 
 
+def create_food(x, y, map_area):
+    food_item = Item(weight=3, value=5, intensity=0.1, has_use=healing_item)
+    food = Object_Place(x, y, map_area, 'Carrot', 'v', item=food_item)
+    return food
 
-# https://gamedev.stackexchange.com/questions/85871/how-should-loot-be-distributed-across-dungeon-levels
-# if head & Metal = Helmet
-# if head & Wool = Cap
-#  Then mention material + item:
-#   Gold Helmet/ Steel Helmet
-#
-# Primary Materials have defence/offense attribute:
-# e.g.   50, if gold 50 * 0.2
-#            if steel 50 * 0.9
-#
-# representation based on class
-#    --> e.g. tier 1: ^
-#    --> e.g. tier 2: n
-#    --> e.g. tier 3: M
-
-veg_intensity_dict = {
-    'carrot': 0.1,
-    'potatoe': 0.5,
-    'pumpkin': 0.4
-}
-
-veg_wieght_dict = {
-    'carrot': 2,
-    'potatoe': 3,
-    'pumpkin': 4
-}
-
-limb_dict = {
-    'legs': 15,
-    'head': 3
-}
-
-limb_priority = {
-    'legs': 2,
-    'head': 10,
-    'chest': 8,
-}
-
-representation_dict = {
-    'legs': 'h',
-    'head': '^'
-}
-
-animal_dict = {
-    'rabbit': {'size': 2, 'carries': ['veg'], 'strength':0, 'representation': 'r'},    
-    'bird': {'size': 1, 'carries': ['pumpkin'], 'strength':0, 'representation': 'm'}
-}
-
-
-def create_tame_animal(x, y, map_area):
-    animals = animal_dict.keys()
-    animal = random.choice(animals)
     
-    hp = animal_dict[animal]['size']*100
-    power = animal_dict[animal]['strength']
-    representation = animal_dict[animal]['representation']
+def create_tame_animal(x, y, map_area):
+    animal_keys = ani.Animal_Data.keys()
+    animal = random.choice(animal_keys)
+    
+    hp = ani.Animal_Data[animal]['size']*100
+    power = ani.Animal_Data[animal]['strength']
+    representation = ani.Animal_Data[animal]['representation']
     
     # Create Item to carry
 
@@ -68,10 +26,11 @@ def create_tame_animal(x, y, map_area):
     final_animal = Object_Place(x, y, map_area, animal, representation, creature=animal_object)
     return final_animal
 
+    
 def create_door(x, y, map_area):
     # Add wood
-    materials = mat.Metal_Data['metals'].keys()
-    material = random.choice(materials)
+    material_keys = mat.Metal_Data['metals'].keys()
+    material = random.choice(material_keys)
     
     name = '{} door'.format(material)
     strength = float(mat.Metal_Data['metals'][material]['strength'])/10.
@@ -124,4 +83,17 @@ print 'Tier: ', tier
 print 'Value', 'Weight', 'Name'
 print gen_item.item.value, gen_item.item.weight, gen_item.name
 print 'Usefulness: ', gen_item.equipment.magnitute
+
+# hat_item = Item(weight=2, value=10)
+# hat_equip = Equipment('Head', magnitute=20, affect='hp')
+# hat = Object_Place(None, None, map_area, 'Straw Hat', '^', item=hat_item, equipment=hat_equip)
+
+stone_item = Item(weight=10, value=0)
+stone = Object_Place(None, None, map_area, 'Small Stone', 's', item=stone_item)
+
+ring_item = Item(weight=2, value=30)
+ring_equip = Equipment('Finger', magnitute=78, affect='power')
+ring = Object_Place(None, None, map_area, 'Ring Of Power', 'o', item=ring_item, equipment=ring_equip)
+
+
 """
