@@ -13,3 +13,7 @@
 
 # session files
 .session
+
+# Excel Files
+.xlsx
+.xls
