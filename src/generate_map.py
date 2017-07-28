@@ -2,15 +2,27 @@ from map_class import Grid
 from containers import *
 import object_creator as obj
 
+# needed to object test
+from objects import *
 
 def generate(horrizontal, vertical, biome):
     map_area = Grid(horrizontal, vertical, biome)
 
+    food = obj.create_food(None, None, map_area)
+    
+    bucket_storage = Storage(capacity=25, contains=[food])
+    bucket = Object_Place(5, 3, map_area, 'bucket', 'u', storage=bucket_storage)
+    OBJECT_CONTAINER.append(bucket)
+    
+    animal_object = Creature(hp=12, power=5, death=creature_death)
+    final_animal = Object_Place(5, 7, map_area, 'pig', 'p', creature=animal_object)
+    OBJECT_CONTAINER.append(final_animal)
+    
     # Make items Equiped or in inventory.
     obj.create_food(5, 6, map_area)
 
     for building in map_area.rooms:
-        # should pass in this structure value into the creation distribution
+        # should pass 'structure_value' into the creation property distribution
         structure_value = building.room.value
         
         for (x, y) in building.room.door_space:

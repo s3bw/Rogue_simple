@@ -1,11 +1,14 @@
 import random
-
 from objects import *
 from item_uses import *
 import data.materials as mat
 import data.animals as ani
 
 
+
+
+
+# Make these functions before making data.
 def create_food(x, y, map_area):
     food_item = Item(weight=3, value=5, intensity=0.1, has_use=healing_item)
     food = Object_Place(x, y, map_area, 'Carrot', 'v', item=food_item)
@@ -34,7 +37,7 @@ def create_door(x, y, map_area):
     
     name = '{} door'.format(material)
     strength = float(mat.Metal_Data['metals'][material]['strength'])/10.
-    weight = mat.Metal_Data['metals'][material]['weight']*10
+    weight = mat.Metal_Data['metals'][material]['weight']*5
     
     door_object = Door(lock_strength=strength, lock_durability=weight)
     final_door = Object_Place(x, y, map_area, name, '+', door=door_object)

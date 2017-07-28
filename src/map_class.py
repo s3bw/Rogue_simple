@@ -89,7 +89,7 @@ class Tile:
         self.wall_tile = wall_tile
                 
     def make_wall(self):
-        self.wall_tile = True    
+        self.wall_tile = True
         self.blocked = True
         self.portray = '#'
 
@@ -158,6 +158,7 @@ class Grid:
             room_component = Room(self, value=new_value, doors=2, room_objects=2)
             map_object = Rect(new_x, new_y, new_h, new_v, room=room_component)
             
+            # Valid room check
             if not any(created_room.intersect(map_object) for created_room in rooms):
                 map_object.room.define_spaces()
                 return map_object

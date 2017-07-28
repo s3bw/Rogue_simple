@@ -19,10 +19,8 @@ sword = Object_Place(None, None, current_area, 'Long Sword', '/', item=long_swor
 
 player = Creature(hp=50, power=5, death=creature_death, inventory=[], attire=[sword])
 user = Object_Place(5, 5, current_area, 'Player Character', '@', creature=player)
+user.creature.hp -= 20
 OBJECT_CONTAINER.append(user)
-
-print [n.name for n in OBJECT_CONTAINER]
-print sword.equipment.is_equipped
 
 
 def build_bar(attribute_name, max, current):
@@ -39,8 +37,11 @@ def render_map():
     for object in OBJECT_CONTAINER:
         if object != user:
             object.draw()
-    
-        print (object.x, object.y), object.name, object.representation
+        
+        if not object.storage:
+            print (object.x, object.y), object.name, object.representation
+        else:
+            print (object.x, object.y), object.name, object.representation, object.storage.remaining_capacity, object.storage.max_capacity
 
     user.draw()
     current_area.show()
@@ -67,6 +68,9 @@ while game_state == True:
     user_input = raw_input('Where to?')
     if user_input == 'exit':
         break
+        
+    if user_input == 'open' or user_input == 'o':
+        player_query_storage(user)
         
     if user_input == 'close' or user_input == 'c':
         player_toggle_door(user)
