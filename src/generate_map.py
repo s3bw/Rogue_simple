@@ -10,7 +10,7 @@ def generate(horrizontal, vertical, biome):
     obj.create_food(5, 6, map_area)
 
     for building in map_area.rooms:
-        # should pass in this structure value into the creation distribution
+        # should pass 'structure_value' into the creation property distribution
         structure_value = building.room.value
         
         for (x, y) in building.room.door_space:

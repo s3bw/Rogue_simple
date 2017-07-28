@@ -1,6 +1,7 @@
 from containers import OBJECT_CONTAINER
 from death_scenes import *
 from item_uses import *
+from user_functions import check_inventory
 # from src.message import Message
 
 
@@ -10,7 +11,8 @@ class Object_Place:
             creature=None,
             item=None,
             equipment=None,
-            door=None
+            door=None,
+            storage=None
         ):
         
         self.x = x
@@ -53,6 +55,7 @@ class Object_Place:
 
             
 class Door:
+    # Need to see this to understand how many hits this takes (balance)
     def __init__(self, lock_strength=0.5, lock_durability=10, open=False):
         self.lock_durability = lock_durability
         self.lock_strength = lock_strength
@@ -80,7 +83,32 @@ class Door:
                 self.owner.passable = False
         else:
             print 'Door is locked.'
-    
+            
+            
+class Storage:
+    def __init__(self, capacity, contains=None):
+    # Storage object will become infinity chests - item save between plays
+    # Once an item goes in it can only be taken out in other play through
+        self.capacity = capacity
+        self.contains = contains
+        
+    def query_storage(self, unit):
+        units_inventory = unit.creature.inventory
+        
+        if not contains:
+            print self.name, 'is empty.'
+            return
+        
+        taking_item = check_inventory(self.contains)
+        units_inventory.append(taking_item)
+        
+    def store(self, unit):
+        units_inventory = unit.creature.inventory
+        storing_item = check_inventory(units_inventory)
+        
+        units_inventory.remove(storing_item)
+        self.contains.append(storing_item)
+        
 
 equip_bonus = lambda entity, attribute: sum(
     wearing_item.equipment.magnitute 
