@@ -48,6 +48,20 @@ def player_move(user, user_input):
     else:
         user.move(dx, dy)
 
+def player_query_storage(user):
+    area_around_user = [(dx + user.x, dy + user.y) for (dx, dy) in OFF_SETS]
+    user_input = raw_input('Would you like to storage or take? (S/T)')
+    
+    if user_input == 'S':
+        for object in OBJECT_CONTAINER:
+            if (object.x, object.y) in area_around_user and object.storage:
+                object.storage.store(user)    
+    
+    if user_input == 'T':
+        for object in OBJECT_CONTAINER:
+            if (object.x, object.y) in area_around_user and object.storage:
+                object.storage.query(user)
+
 def player_toggle_door(user):
     area_around_user = [(dx + user.x, dy + user.y) for (dx, dy) in OFF_SETS]
     for object in OBJECT_CONTAINER:

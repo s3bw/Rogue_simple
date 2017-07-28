@@ -26,6 +26,7 @@ class Object_Place:
         self.item = item
         self.equipment = equipment
         self.door = door
+        self.storage = storage
         
         if self.creature:
             self.creature.owner = self
@@ -39,7 +40,10 @@ class Object_Place:
             self.passable = True
             
         if self.door:
-            self.door.owner = self            
+            self.door.owner = self
+            
+        if self.storage:
+            self.storage.owner = self
             
     def draw(self):
         self.grid_level.draw_on_grid(self.x, self.y, self.representation, self.passable)
@@ -56,7 +60,7 @@ class Object_Place:
             
 class Door:
     # Need to see this to understand how many hits this takes (balance)
-    def __init__(self, lock_strength=0.5, lock_durability=10, open=False):
+    def __init__(self, lock_strength=0.5, lock_durability=3, open=False):
         self.lock_durability = lock_durability
         self.lock_strength = lock_strength
         self.open = open
@@ -86,28 +90,37 @@ class Door:
             
             
 class Storage:
-    def __init__(self, capacity, contains=None):
     # Storage object will become infinity chests - item save between plays
     # Once an item goes in it can only be taken out in other play through
-        self.capacity = capacity
+    def __init__(self, capacity, contains=None):
+        self.max_capacity = capacity
         self.contains = contains
+
+    @property
+    def remaining_capacity(self):
+        used_capacity = sum(stored_item.item.weight for stored_item in self.contains)
+        return self.max_capacity - used_capacity
         
-    def query_storage(self, unit):
+    def query(self, unit):
         units_inventory = unit.creature.inventory
-        
-        if not contains:
-            print self.name, 'is empty.'
+        if not self.contains:
+            print self.owner.name, 'is empty.'
             return
         
         taking_item = check_inventory(self.contains)
+        self.contains.remove(taking_item)
         units_inventory.append(taking_item)
         
     def store(self, unit):
         units_inventory = unit.creature.inventory
         storing_item = check_inventory(units_inventory)
-        
-        units_inventory.remove(storing_item)
-        self.contains.append(storing_item)
+
+        if storing_item and self.remaining_capacity > storing_item.item.weight:
+            units_inventory.remove(storing_item)
+            self.contains.append(storing_item)
+            
+        elif storing_item:
+            print '{} is full.'.format(self.owner.name)
         
 
 equip_bonus = lambda entity, attribute: sum(
@@ -124,6 +137,10 @@ class Creature:
         
         self.death = death
         self.inventory = inventory
+        
+        if attire:
+            for obj in attire:
+                obj.equipment.is_equipped = True
         self.attire = attire
         
     @property
@@ -143,7 +160,6 @@ class Creature:
             self.hp -= damage
             if self.hp <= 0:
                 # Maybe drop the item here.
-                # Item needs to be pickup-able, the corpse can't get in the way.
                 print '{} has Died.'.format(self.owner.name)
                 self.death(self.owner)
             else:
@@ -198,31 +214,15 @@ class Equipment:
         self.is_equipped = False
         
         self.magnitute = magnitute
-        self.affect = affect        
-                    
-        # if object is in attire when generating the game it gets equiped value False.
-        # This is not the case as it's in a creatures attire 
+        self.affect = affect
 
-        all_attire = [entity.creature.attire for entity in OBJECT_CONTAINER if entity.creature]
+        all_attire = [
+            entity.creature.attire 
+            for entity in OBJECT_CONTAINER 
+            if entity.creature
+        ]
         if self not in OBJECT_CONTAINER and (self in all_attire):
             self.is_equipped = True
-        
-    # @property
-    # def is_equipped(self):
-        # return self._is_equipped
-        
-    # @is_equipped.setter
-    # def is_equipped(self):
-        # global_attire = [
-            # dressed.creature.attire 
-            # for dressed in OBJECT_CONTAINER 
-            # if dressed.creature is not None
-        # ]
-        
-        # self._is_equipped = (self in global_attire)
-        
-#        if self in global_attire:
-  #          self.is_equipped = True
         
         
     def toggle_equip(self, unit):
