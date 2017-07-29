@@ -60,7 +60,7 @@ class Object_Place:
             
 class Door:
     # Need to see this to understand how many hits this takes (balance)
-    def __init__(self, lock_strength=0.5, lock_durability=3, open=False):
+    def __init__(self, lock_strength=0.5, lock_durability=10, open=False):
         self.lock_durability = lock_durability
         self.lock_strength = lock_strength
         self.open = open
@@ -159,7 +159,8 @@ class Creature:
         if damage > 0:
             self.hp -= damage
             if self.hp <= 0:
-                # Maybe drop the item here.
+                self.drop_item()
+                
                 print '{} has Died.'.format(self.owner.name)
                 self.death(self.owner)
             else:
@@ -255,7 +256,6 @@ class Equipment:
         
 
 def creature_death(corpse):
-    corpse.creature.drop_item()
     corpse.creature = None
     corpse.passable = True
     corpse.name = 'Mangled {} corpse.'.format(corpse.name)

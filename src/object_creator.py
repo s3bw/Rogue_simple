@@ -37,7 +37,7 @@ def create_door(x, y, map_area):
     
     name = '{} door'.format(material)
     strength = float(mat.Metal_Data['metals'][material]['strength'])/10.
-    weight = mat.Metal_Data['metals'][material]['weight']*5
+    weight = mat.Metal_Data['metals'][material]['weight']*1
     
     door_object = Door(lock_strength=strength, lock_durability=weight)
     final_door = Object_Place(x, y, map_area, name, '+', door=door_object)

@@ -104,7 +104,6 @@ class Grid:
         self.grid_area = self.grid_h * self.grid_v
         
         self.biome = grid_biome
-        
         self.create_grid()
         
     def create_grid(self):
