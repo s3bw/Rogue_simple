@@ -173,10 +173,15 @@ class Creature:
             target.creature.take_damage(damage)
             
     def drop_item(self):
-        # include attire in this calculation currently only drops from inventory
+        belongings = []
         if self.inventory:
-            highest_value = max(self.inventory, key=lambda x: x.item.value)
-            self.inventory.remove(highest_value)
+            belongings += self.inventory
+        if self.attire:
+            belongings += self.attire
+
+        if belongings:
+            highest_value = max(belongings, key=lambda x: x.item.value)
+            highest_value.equipment.is_equipped = False
             highest_value.item.drop(self.owner.x, self.owner.y)
         
             print 'Dropped {}.'.format(highest_value.name)
