@@ -173,18 +173,16 @@ class Creature:
             target.creature.take_damage(damage)
             
     def drop_item(self):
-        belongings = []
-        if self.inventory:
-            belongings += self.inventory
-        if self.attire:
-            belongings += self.attire
+        belongings = []        
+        belongings += self.inventory if self.inventory else []        
+        belongings += self.attire if self.attire else []
 
         if belongings:
-            highest_value = max(belongings, key=lambda x: x.item.value)
-            highest_value.equipment.is_equipped = False
-            highest_value.item.drop(self.owner.x, self.owner.y)
+            most_valued_item = max(belongings, key=lambda x: x.item.value)
+            most_valued_item.equipment.is_equipped = False
+            most_valued_item.item.drop(self.owner.x, self.owner.y)
         
-            print 'Dropped {}.'.format(highest_value.name)
+            print 'Dropped {}.'.format(most_valued_item.name)
         
     def is_slot_empty(self, check_slot):
         for item_in_bag in self.attire:
