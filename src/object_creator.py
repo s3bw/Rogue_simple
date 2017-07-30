@@ -28,7 +28,8 @@ class Select_Material:
         if 'wood' in self.material_list:
             materials.update(mat.Wood_Data)
         if 'textile' in self.material_list:
-            materials.update(mat.Textile_Data)            
+            materials.update(mat.Textile_Data)
+        # include stone
         return self.choose_material(materials)        
         
     def filter_less_than(self, materials_dict):
@@ -76,7 +77,7 @@ class Create:
         power = ani.Animal_Data[animal]['strength']
         representation = ani.Animal_Data[animal]['representation']
         
-        # Create Item to carry
+        # Create Item to carry (e.g. 'hat', 'food')
 
         animal_object = Creature(hp=hp, power=power, death=creature_death) #, inventory=[carrot])
         final_animal = Object_Place(self.x, self.y, self.area, animal, representation, creature=animal_object)
