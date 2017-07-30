@@ -68,7 +68,7 @@ def player_toggle_door(user):
         if (object.x, object.y) in area_around_user and object.door:
             object.door.toggle()
 
-def player_move_down(user, depth_index):
+def player_travel_z(user, depth_index):
     user_inventory = user.creature.inventory
 
     for object in OBJECT_CONTAINER:
