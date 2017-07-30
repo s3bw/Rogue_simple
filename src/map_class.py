@@ -2,6 +2,8 @@ import math
 import random
 from containers import *
 
+DEFAULT_GRID_X = 20
+DEFAULT_GRID_Y = 20
 MAX_SIZE_ROOM = 7
 MIN_SIZE_ROOM = 4
 ROOM_AREA = MAX_SIZE_ROOM * MAX_SIZE_ROOM
@@ -98,13 +100,25 @@ class Tile:
         
         
 class Grid:
-    def __init__(self, grid_h, grid_v, grid_biome='village'):
+    def __init__(self, grid_h=DEFAULT_GRID_X, grid_v=DEFAULT_GRID_Y, grid_z=0, grid_biome='village'):
         self.grid_h = grid_h
         self.grid_v = grid_v
+        self.grid_z = grid_z
         self.grid_area = self.grid_h * self.grid_v
         
         self.biome = grid_biome
         self.create_grid()
+
+    def create_stair(self):
+        stair_space = []
+        for y in range(self.grid_h):
+            for x in range(self.grid_v):
+                if not self.grid[x][y].blocked:
+                    stair_space .append((x, y))    
+        
+        pick_stairs = random.randint(1, len(stair_space) - 1)
+        
+        self.point_of_stair = stair_space[pick_stairs]
         
     def create_grid(self):
         self.grid = [[
@@ -135,7 +149,9 @@ class Grid:
             for x in range(self.grid_v):
                 if any(map_object.edges(x,y) and (x,y) not in map_object.room.door_space for map_object in self.rooms):
                     self.grid[x][y].make_wall()
+                    self.grid[x][y].blocked = True
                     
+        self.create_stair()
         # Include types of maps gen - above ground/below
             
     def create_room(self, rooms, new_h, new_v):

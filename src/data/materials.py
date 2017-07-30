@@ -243,7 +243,8 @@ Metal_Data = {
         'rarity': 30
     },
     'white brass': {
-        'strength': 20,
+        'special': 'Crits',
+        'strength': 18,
         'weight': 30,
         'value': 8,
         'rarity': 35

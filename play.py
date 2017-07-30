@@ -7,22 +7,6 @@ from src.objects import *
 from src.user_functions import *
 # from src.message import Message
 
-map_gen.generate(20, 20, 'village')
-
-depth_index = 0
-current_area = WORLD_CONTAINER[depth_index]
-
-#PLAYER and PLAYER ITEMS
-long_sword_item = Item(weight=5, value=60)
-sword_equip = Equipment(['Main-Hand','Off-Hand'], magnitute=125, optional_slot=True, equipped_slot='Main-Hand', affect='power')
-sword = Object_Place(None, None, current_area, 'Long Sword', '/', item=long_sword_item, equipment=sword_equip)
-
-player = Creature(hp=50, power=5, death=creature_death, inventory=[], attire=[sword])
-user = Object_Place(5, 5, current_area, 'Player Character', '@', creature=player)
-user.creature.hp -= 20
-OBJECT_CONTAINER.append(user)
-
-
 def build_bar(attribute_name, max, current):
     total_bars = 20
     number_of_bars = int(float(current)/float(max) * total_bars)
@@ -32,6 +16,7 @@ def build_bar(attribute_name, max, current):
 
 
 def render_map():
+    current_area = WORLD_CONTAINER[0]
     
     current_area.refresh_grid()
     for object in OBJECT_CONTAINER:
@@ -49,6 +34,7 @@ def render_map():
     for x in user.creature.attire:
         print x.equipment.equipped_slot
     
+    print 'Depth:', user.active_z, len(WORLD_CONTAINER)
     print 'Attire: ', [k.name for k in user.creature.attire]    
     print 'Added Power: ', sum(k.equipment.magnitute for k in user.creature.attire if k.equipment.affect == 'power')
     print 'Inventory: ', [k.name for k in user.creature.inventory]    
@@ -63,7 +49,21 @@ def render_map():
     print '-'*41
 
     
-# key presses 
+    
+depth = 0
+map_gen.generate(grid_z=depth)
+
+#PLAYER and PLAYER ITEMS
+long_sword_item = Item(weight=5, value=60)
+sword_equip = Equipment(['Main-Hand','Off-Hand'], magnitute=125, optional_slot=True, equipped_slot='Main-Hand', affect='power')
+sword = Object_Place(None, None, depth, 'Long Sword', '/', item=long_sword_item, equipment=sword_equip)
+
+player = Creature(hp=50, power=5, death=creature_death, inventory=[], attire=[sword])
+user = Object_Place(5, 5, depth, 'Player Character', '@', creature=player)
+user.creature.hp -= 20
+OBJECT_CONTAINER.append(user)
+
+# key presses
 game_state = True
 while game_state == True:
     render_map()
@@ -71,6 +71,9 @@ while game_state == True:
     user_input = raw_input('Where to?')
     if user_input == 'exit':
         break
+        
+    if user_input == '>' or user_input == '<':
+        player_move_down(user, user.active_z)
         
     if user_input == 'open' or user_input == 'o':
         player_query_storage(user)
@@ -96,5 +99,3 @@ while game_state == True:
     if user_input in MOVES:
         player_move(user, user_input)
         
-
-

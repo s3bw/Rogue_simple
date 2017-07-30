@@ -2,7 +2,6 @@
 A classic Roguelike
 
 ## TODO:[Complexity out of 10, Time out of 10]
-- Stairs [2,2]
 - Creature-limbs [4,6]
 - Attack-Targeting [6,5]
 - Map-gen round 2 [8,10]
