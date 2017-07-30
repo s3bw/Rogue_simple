@@ -14,7 +14,7 @@ current_area = WORLD_CONTAINER[depth_index]
 
 #PLAYER and PLAYER ITEMS
 long_sword_item = Item(weight=5, value=60)
-sword_equip = Equipment('Hand', magnitute=125, affect='power')
+sword_equip = Equipment(['Main-Hand','Off-Hand'], magnitute=125, optional_slot=True, equipped_slot='Main-Hand', affect='power')
 sword = Object_Place(None, None, current_area, 'Long Sword', '/', item=long_sword_item, equipment=sword_equip)
 
 player = Creature(hp=50, power=5, death=creature_death, inventory=[], attire=[sword])
@@ -46,6 +46,9 @@ def render_map():
     user.draw()
     current_area.show()
 
+    for x in user.creature.attire:
+        print x.equipment.equipped_slot
+    
     print 'Attire: ', [k.name for k in user.creature.attire]    
     print 'Added Power: ', sum(k.equipment.magnitute for k in user.creature.attire if k.equipment.affect == 'power')
     print 'Inventory: ', [k.name for k in user.creature.inventory]    

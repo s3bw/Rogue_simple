@@ -2,7 +2,7 @@ Melee_Weapon_Data = {
     "rondel": {
         "mat_types": ["metal"],
         "notable": "Hans",
-        "size_string": "None",
+        "size_string": None,
         "pierce_trauma": 0.9,
         "blunt_trauma": 0.1,
         "type": "dagger",
@@ -11,7 +11,7 @@ Melee_Weapon_Data = {
     "ballock": {
         "mat_types": ["metal"],
         "notable": "Rose",
-        "size_string": "None",
+        "size_string": None,
         "pierce_trauma": 0.9,
         "blunt_trauma": 0.2,
         "type": "dagger",
@@ -53,10 +53,10 @@ Melee_Weapon_Data = {
         "type": "sword",
         "size": 4
     },
-    "broad-sword ": {
+    "broad-sword": {
         "mat_types": ["metal"],
         "notable": "Dao",
-        "size_string": " long",
+        "size_string": "long",
         "pierce_trauma": 0.9,
         "blunt_trauma": 0.8,
         "type": "sword",
@@ -65,7 +65,7 @@ Melee_Weapon_Data = {
     "xiphos ": {
         "mat_types": ["metal"],
         "notable": "Actaeon",
-        "size_string": " short",
+        "size_string": "short",
         "pierce_trauma": 0.9,
         "blunt_trauma": 0.7,
         "type": "sword",
@@ -74,7 +74,7 @@ Melee_Weapon_Data = {
     "golok": {
         "mat_types": ["metal"],
         "notable": "Engkantos",
-        "size_string": "None",
+        "size_string": None,
         "pierce_trauma": 0.9,
         "blunt_trauma": 0.4,
         "type": "dagger",
@@ -92,7 +92,7 @@ Melee_Weapon_Data = {
     "pugio": {
         "mat_types": ["metal"],
         "notable": "Brutus",
-        "size_string": "None",
+        "size_string": None,
         "pierce_trauma": 0.9,
         "blunt_trauma": 0.1,
         "type": "dagger",
@@ -115,10 +115,10 @@ Melee_Weapon_Data = {
         "type": "sword",
         "size": 5
     },
-    "claymore ": {
+    "claymore": {
         "mat_types": ["metal"],
         "notable": "Dunvegan",
-        "size_string": " long",
+        "size_string": "long",
         "pierce_trauma": 0.9,
         "blunt_trauma": 0.8,
         "type": "sword",
@@ -145,7 +145,7 @@ Melee_Weapon_Data = {
     "dirk": {
         "mat_types": ["metal"],
         "notable": "Highlands",
-        "size_string": "None",
+        "size_string": None,
         "pierce_trauma": 0.9,
         "blunt_trauma": 0.2,
         "type": "dagger",
@@ -159,7 +159,7 @@ Melee_Weapon_Data = {
         "type": "blunt",
         "size": 5
     },
-    "sword-hilt": {
+    "sword-hilted": {
         "mat_types": ["metal"],
         "notable": "Edgar",
         "size_string": "None",
@@ -186,19 +186,19 @@ Melee_Weapon_Data = {
         "type": " axe",
         "size": 7
     },
-    "flame-bladed-sword ": {
+    "flame-bladed-sword": {
         "mat_types": ["metal"],
         "notable": "Flammenkrieg",
-        "size_string": " long",
+        "size_string": "long",
         "pierce_trauma": 0.9,
         "blunt_trauma": 0.8,
         "type": "sword",
         "size": 8
     },
-    "long_sword ": {
+    "long_sword": {
         "mat_types": ["metal"],
         "notable": "Mordhau",
-        "size_string": " long",
+        "size_string": "long",
         "pierce_trauma": 0.8,
         "blunt_trauma": 0.8,
         "type": " sword",

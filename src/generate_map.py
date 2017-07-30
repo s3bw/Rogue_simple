@@ -14,9 +14,12 @@ def generate(horrizontal, vertical, biome):
     bucket_storage = Storage(capacity=25, contains=[food])
     bucket = Object_Place(5, 3, map_area, 'bucket', 'u', storage=bucket_storage)
     OBJECT_CONTAINER.append(bucket)
-        
+    
+    make_weapon = Create(7, 5, map_area).weapon()
+    OBJECT_CONTAINER.append(make_weapon)
+    
     ring_item = Item(weight=2, value=30)
-    ring_equip = Equipment('Finger', magnitute=78, affect='power')
+    ring_equip = Equipment(['Finger'], magnitute=78, affect='power')
     ring = Object_Place(None, None, map_area, 'Ring Of Power', 'o', item=ring_item, equipment=ring_equip)
     
     animal_object = Creature(hp=12, power=5, death=creature_death, inventory=[], attire=[ring])

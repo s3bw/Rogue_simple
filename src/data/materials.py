@@ -210,6 +210,7 @@ Metal_Data = {
         'rarity': 25
     },
     'silver': {
+        'special': 'burns were beasts',
         'strength': 20,
         'weight': 25,
         'value': 8,
