@@ -73,7 +73,7 @@ while game_state == True:
         break
         
     if user_input == '>' or user_input == '<':
-        player_move_down(user, user.active_z)
+        player_travel_z(user, user.active_z)
         
     if user_input == 'open' or user_input == 'o':
         player_query_storage(user)
