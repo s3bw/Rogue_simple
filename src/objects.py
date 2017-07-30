@@ -1,4 +1,5 @@
-from containers import OBJECT_CONTAINER
+from containers import OBJECT_CONTAINER, WORLD_CONTAINER
+import generate_map as map_gen
 from death_scenes import *
 from item_uses import *
 from user_functions import check_inventory
@@ -7,17 +8,18 @@ from user_functions import check_inventory
 
 class Object_Place:
     def __init__(self, 
-            x, y, grid_level, name, representation, passable=False,
+            x, y, active_z, name, representation, passable=False,
             creature=None,
             item=None,
             equipment=None,
             door=None,
-            storage=None
+            storage=None,
+            stairs=None
         ):
         
         self.x = x
         self.y = y
-        self.grid_level = grid_level
+        self.active_z = active_z        
         self.name = name
         self.representation = representation
         self.passable = passable
@@ -27,6 +29,7 @@ class Object_Place:
         self.equipment = equipment
         self.door = door
         self.storage = storage
+        self.stairs = stairs
         
         if self.creature:
             self.creature.owner = self
@@ -45,6 +48,14 @@ class Object_Place:
         if self.storage:
             self.storage.owner = self
             
+        if self.stairs:
+            self.stairs.owner = self
+            self.passable = True
+          
+    @property
+    def grid_level(self):
+        return WORLD_CONTAINER[0]
+            
     def draw(self):
         self.grid_level.draw_on_grid(self.x, self.y, self.representation, self.passable)
             
@@ -58,6 +69,25 @@ class Object_Place:
             self.y += dy
 
             
+class Stairs:
+    def __init__(self, down=True):
+        self.down = down
+        
+        if not self.down:
+            self.representation = '<'
+        
+    def use_stairs(self, unit, depth_index):
+        depth_index = depth_index + 1 if self.down else depth_index - 1
+        
+        OBJECT_CONTAINER.remove(unit)
+        del OBJECT_CONTAINER[:]
+        del WORLD_CONTAINER[:]
+        OBJECT_CONTAINER.append(unit)
+        
+        map_gen.generate(grid_z=depth_index, down=self.down)
+        unit.active_z = depth_index
+    
+    
 class Door:
     # Need to see this to understand how many hits this takes (balance)
     def __init__(self, lock_strength=0.5, lock_durability=10, open=False):
@@ -237,7 +267,6 @@ class Equipment:
         
         
     def toggle_equip(self, unit):
-        print self.owner.name, 'equipt?', self.is_equipped
         if self.is_equipped:
             self.dequip(unit.creature)
         else:

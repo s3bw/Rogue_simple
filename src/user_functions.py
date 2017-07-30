@@ -67,7 +67,14 @@ def player_toggle_door(user):
     for object in OBJECT_CONTAINER:
         if (object.x, object.y) in area_around_user and object.door:
             object.door.toggle()
-        
+
+def player_move_down(user, depth_index):
+    user_inventory = user.creature.inventory
+
+    for object in OBJECT_CONTAINER:
+        if object != user and object.x == user.x and object.y == user.y and object.stairs:
+            object.stairs.use_stairs(user, depth_index)
+            
         
 def player_equip_item(user):
     user_inventory = user.creature.inventory

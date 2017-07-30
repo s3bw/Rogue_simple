@@ -56,17 +56,19 @@ class Select_Material:
 
 
 class Create:
-    def __init__(self, x=None, y=None, area=None, rarity_value=0):
+    def __init__(self, x=None, y=None, z=None, rarity_value=0):
         self.x = x
-        self.y = y 
-        self.area = area
+        self.y = y
+        self.z = z
         
         self.rarity_value = rarity_value/100.
+        
+    #def stairs(self):
     
     # Make these functions before making data.
     def food(self):
         food_item = Item(weight=3, value=5, intensity=0.1, has_use=healing_item)
-        food = Object_Place(self.x, self.y, self.area, 'Carrot', 'v', item=food_item)
+        food = Object_Place(self.x, self.y, self.z, 'Carrot', 'v', item=food_item)
         return food
         
     def tame_animal(self):
@@ -80,7 +82,7 @@ class Create:
         # Create Item to carry (e.g. 'hat', 'food')
 
         animal_object = Creature(hp=hp, power=power, death=creature_death) #, inventory=[carrot])
-        final_animal = Object_Place(self.x, self.y, self.area, animal, representation, creature=animal_object)
+        final_animal = Object_Place(self.x, self.y, self.z, animal, representation, creature=animal_object)
         return final_animal
         
     def door(self):
@@ -90,7 +92,7 @@ class Create:
         
         name = '{} door'.format(material)       
         door_object = Door(lock_strength=strength, lock_durability=weight)
-        final_door = Object_Place(self.x, self.y, self.area, name, '+', door=door_object)
+        final_door = Object_Place(self.x, self.y, self.z, name, '+', door=door_object)
         return final_door
         
     def weapon(self):
@@ -114,7 +116,7 @@ class Create:
         
         weapon_item = Item(weight=weight, value=value)
         weapon_equip = Equipment(slots, magnitute=magnitute, optional_slot=optional_slot, affect='power')
-        weapon = Object_Place(self.x, self.y, self.area, weapon_name, '/', item=weapon_item, equipment=weapon_equip)
+        weapon = Object_Place(self.x, self.y, self.z, weapon_name, '/', item=weapon_item, equipment=weapon_equip)
         return weapon
 
     
