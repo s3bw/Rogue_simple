@@ -5,43 +5,91 @@ import data.materials as mat
 import data.animals as ani
 
 
+class Select_Material:
+    def __init__(self, threshold_value=0, threshold_field='strength', material_list=None, filter_type='less_than'):
+        self.threshold_value = threshold_value
+        self.threshold_field = threshold_field
+        self.filter_type = filter_type
+        
+        self.material_list = material_list        
+        self.material = self.get_materials()
+
+    def choose_material(self, materials_dict):
+        materials_dict = self.filter_less_than(materials_dict)
+        material_keys = materials_dict.keys()
+        chosen_material = random.choice(material_keys)        
+        return chosen_material, materials_dict[chosen_material]        
+        
+    def get_materials(self):
+        materials = {}        
+        if 'metal' in self.material_list:
+            materials.update(mat.Metal_Data)
+        if 'wood' in self.material_list:
+            materials.update(mat.Wood_Data)
+        if 'textile' in self.material_list:
+            materials.update(mat.Textile_Data)            
+        return self.choose_material(materials)        
+        
+    def filter_less_than(self, materials_dict):
+        """
+        Finds the max value in the field to filter by and multiplies the max by the 'threshold_value'.
+        
+        :param materials_dict: (dict) of materials to select from. (e.g. {'iron' : { 'value': 6, 'weight': 28})
+        :return: the materials_dict after filtering the lower values.
+        """
+        max_in_field = max({
+            materials_dict[key][self.threshold_field] 
+            for (key, val) in materials_dict.iteritems()
+        })
+
+        materials_dict = {
+            material: value 
+            for material, value in materials_dict.iteritems() 
+            if value[self.threshold_field] >= (max_in_field * self.threshold_value)
+        }
+        return materials_dict
+        
+    def get(self):
+        return self.material
 
 
+class Create:
+    def __init__(self, x=None, y=None, area=None, rarity_value=50):
+        self.x = x
+        self.y = y 
+        self.area = area
+        
+        self.rarity_value = rarity_value/100.
+    
+    # Make these functions before making data.
+    def food(self):
+        food_item = Item(weight=3, value=5, intensity=0.1, has_use=healing_item)
+        food = Object_Place(self.x, self.y, self.area, 'Carrot', 'v', item=food_item)
+        return food
+        
+    def tame_animal(self):
+        animal_keys = ani.Animal_Data.keys()
+        animal = random.choice(animal_keys)
+        
+        hp = ani.Animal_Data[animal]['size']*100
+        power = ani.Animal_Data[animal]['strength']
+        representation = ani.Animal_Data[animal]['representation']
+        
+        # Create Item to carry
 
-# Make these functions before making data.
-def create_food(x, y, map_area):
-    food_item = Item(weight=3, value=5, intensity=0.1, has_use=healing_item)
-    food = Object_Place(x, y, map_area, 'Carrot', 'v', item=food_item)
-    return food
-
-    
-def create_tame_animal(x, y, map_area):
-    animal_keys = ani.Animal_Data.keys()
-    animal = random.choice(animal_keys)
-    
-    hp = ani.Animal_Data[animal]['size']*100
-    power = ani.Animal_Data[animal]['strength']
-    representation = ani.Animal_Data[animal]['representation']
-    
-    # Create Item to carry
-
-    animal_object = Creature(hp=hp, power=power, death=creature_death) #, inventory=[carrot])
-    final_animal = Object_Place(x, y, map_area, animal, representation, creature=animal_object)
-    return final_animal
-
-    
-def create_door(x, y, map_area):
-    # Add wood
-    material_keys = mat.Metal_Data['metals'].keys()
-    material = random.choice(material_keys)
-    
-    name = '{} door'.format(material)
-    strength = float(mat.Metal_Data['metals'][material]['strength'])/10.
-    weight = mat.Metal_Data['metals'][material]['weight']*1
-    
-    door_object = Door(lock_strength=strength, lock_durability=weight)
-    final_door = Object_Place(x, y, map_area, name, '+', door=door_object)
-    return final_door
+        animal_object = Creature(hp=hp, power=power, death=creature_death) #, inventory=[carrot])
+        final_animal = Object_Place(self.x, self.y, self.area, animal, representation, creature=animal_object)
+        return final_animal
+        
+    def door(self):
+        material, attributes = Select_Material(self.rarity_value, material_list=['metal', 'wood']).get()
+        strength = attributes['strength']/40.
+        weight = attributes['weight']
+        
+        name = '{} door'.format(material)       
+        door_object = Door(lock_strength=strength, lock_durability=weight)
+        final_door = Object_Place(self.x, self.y, self.area, name, '+', door=door_object)
+        return final_door
     
 """
 # clothing effect defence, while weapon effects power

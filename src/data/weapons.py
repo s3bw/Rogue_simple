@@ -23,7 +23,7 @@ Melee_Weapon_Data = {
         "size_string": "long",
         "pierce_trauma": 0.7,
         "blunt_trauma": 0.9,
-        "type": " axe",
+        "type": "axe",
         "size": 9
     },
     "bearded axe": {
@@ -32,7 +32,7 @@ Melee_Weapon_Data = {
         "size_string": "short",
         "pierce_trauma": 0.8,
         "blunt_trauma": 0.7,
-        "type": " axe",
+        "type": "axe",
         "size": 5
     },
     "mere": {
@@ -41,7 +41,7 @@ Melee_Weapon_Data = {
         "size_string": "short",
         "pierce_trauma": 0.1,
         "blunt_trauma": 0.8,
-        "type": " blunt",
+        "type": "blunt",
         "size": 4
     },
     "baslar": {
@@ -59,7 +59,7 @@ Melee_Weapon_Data = {
         "size_string": " long",
         "pierce_trauma": 0.9,
         "blunt_trauma": 0.8,
-        "type": " sword",
+        "type": "sword",
         "size": 7
     },
     "xiphos ": {
@@ -68,7 +68,7 @@ Melee_Weapon_Data = {
         "size_string": " short",
         "pierce_trauma": 0.9,
         "blunt_trauma": 0.7,
-        "type": " sword",
+        "type": "sword",
         "size": 6
     },
     "golok": {
@@ -112,7 +112,7 @@ Melee_Weapon_Data = {
         "size_string": "short",
         "pierce_trauma": 0.9,
         "blunt_trauma": 0.7,
-        "type": " sword",
+        "type": "sword",
         "size": 5
     },
     "claymore ": {
@@ -121,7 +121,7 @@ Melee_Weapon_Data = {
         "size_string": " long",
         "pierce_trauma": 0.9,
         "blunt_trauma": 0.8,
-        "type": " sword",
+        "type": "sword",
         "size": 9
     },
     "hand-axe": {
@@ -130,7 +130,7 @@ Melee_Weapon_Data = {
         "size_string": "short",
         "pierce_trauma": 0.3,
         "blunt_trauma": 0.8,
-        "type": " axe",
+        "type": "axe",
         "size": 4
     },
     "sceptre": {
@@ -139,7 +139,7 @@ Melee_Weapon_Data = {
         "size_string": "long",
         "pierce_trauma": 0.6,
         "blunt_trauma": 0.8,
-        "type": " blunt",
+        "type": "blunt",
         "size": 7
     },
     "dirk": {
@@ -156,7 +156,7 @@ Melee_Weapon_Data = {
         "size_string": "short",
         "pierce_trauma": 0.4,
         "blunt_trauma": 0.9,
-        "type": " blunt",
+        "type": "blunt",
         "size": 5
     },
     "sword-hilt": {
@@ -174,7 +174,7 @@ Melee_Weapon_Data = {
         "size_string": "long",
         "pierce_trauma": 0.7,
         "blunt_trauma": 0.8,
-        "type": " blunt",
+        "type": "blunt",
         "size": 7
     },
     "dane axe": {
@@ -192,7 +192,7 @@ Melee_Weapon_Data = {
         "size_string": " long",
         "pierce_trauma": 0.9,
         "blunt_trauma": 0.8,
-        "type": " sword",
+        "type": "sword",
         "size": 8
     },
     "long_sword ": {
@@ -201,7 +201,7 @@ Melee_Weapon_Data = {
         "size_string": " long",
         "pierce_trauma": 0.8,
         "blunt_trauma": 0.8,
-        "type": "  sword",
+        "type": " sword",
         "size": 9
     }
 }
