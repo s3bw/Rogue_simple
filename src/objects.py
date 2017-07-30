@@ -185,10 +185,15 @@ class Creature:
         
             print 'Dropped {}.'.format(most_valued_item.name)
         
-    def is_slot_empty(self, check_slot):
+    def is_slot_empty(self, check_slots):
+        items_in_slots = []
         for item_in_bag in self.attire:
-            if check_slot == item_in_bag.equipment.slot:
-                return item_in_bag
+            for slot_space in check_slots:
+            
+                if slot_space in item_in_bag.equipment.equipped_slot:
+                    items_in_slots.append(item_in_bag)
+                    
+        return items_in_slots
 
         
 class Item:
@@ -213,8 +218,10 @@ class Item:
 
         
 class Equipment:
-    def __init__(self, slot, magnitute, affect=None):
-        self.slot = slot
+    def __init__(self, slots, magnitute, optional_slot=True, equipped_slot=None, affect=None):
+        self.slots = slots
+        self.optional_slot = optional_slot
+        self.equipped_slot = equipped_slot
         self.is_equipped = False
         
         self.magnitute = magnitute
@@ -237,19 +244,29 @@ class Equipment:
             self.equip(unit.creature)
             
     def equip(self, creature):
-        equipment_in_slot = creature.is_slot_empty(self.slot)
+        if self.optional_slot:
+            user_string = 'Where would you like to equipt?({})'.format(','.join(self.slots))
+            select_slot = [raw_input(user_string)]
+        else:
+            select_slot = self.slots
+        
+        equipment_in_slot = creature.is_slot_empty(select_slot)
+        print select_slot
         if equipment_in_slot:
-            equipment_in_slot.equipment.dequip(creature)
+            for x in equipment_in_slot:
+                x.equipment.dequip(creature)
             
         self.is_equipped = True
+        self.equipped_slot = select_slot
         creature.inventory.remove(self.owner)
         creature.attire.append(self.owner)
         print 'Now wearing {}.'.format(self.owner.name)
         
-    def dequip(self, creature):        
+    def dequip(self, creature):
         if not self.is_equipped:
             return
         self.is_equipped = False
+        self.equipped_slot = None
         creature.attire.remove(self.owner)
         creature.inventory.append(self.owner)
         print 'Taken {} off.'.format(self.owner.name)

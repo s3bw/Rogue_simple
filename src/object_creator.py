@@ -3,6 +3,7 @@ from objects import *
 from item_uses import *
 import data.materials as mat
 import data.animals as ani
+import data.weapons as weap
 
 
 class Select_Material:
@@ -54,7 +55,7 @@ class Select_Material:
 
 
 class Create:
-    def __init__(self, x=None, y=None, area=None, rarity_value=50):
+    def __init__(self, x=None, y=None, area=None, rarity_value=0):
         self.x = x
         self.y = y 
         self.area = area
@@ -90,6 +91,31 @@ class Create:
         door_object = Door(lock_strength=strength, lock_durability=weight)
         final_door = Object_Place(self.x, self.y, self.area, name, '+', door=door_object)
         return final_door
+        
+    def weapon(self):
+        weapon_keys = weap.Melee_Weapon_Data.keys()
+        weapon_name = random.choice(weapon_keys)
+        weapon = weap.Melee_Weapon_Data[weapon_name]
+        
+        material_list = weapon['mat_types']
+        material, attributes = Select_Material(self.rarity_value, material_list=material_list).get()
+        
+        # Attribute Calculations
+        weight = (attributes['weight'] * weapon['size']) / 15
+        value = (attributes['value'] * weapon['size']) / 2.5
+        magnitute = attributes['strength'] * 3
+        weapon_name = '{} {}'.format(material,weapon_name).capitalize()
+        
+        slots = ['Main-Hand', 'Off-Hand']
+        optional_slot = True
+        if weapon['size_string'] and weapon['size_string'] == 'long':
+            optional_slot = False
+        
+        weapon_item = Item(weight=weight, value=value)
+        weapon_equip = Equipment(slots, magnitute=magnitute, optional_slot=optional_slot, affect='power')
+        weapon = Object_Place(self.x, self.y, self.area, weapon_name, '/', item=weapon_item, equipment=weapon_equip)
+        return weapon
+
     
 """
 # clothing effect defence, while weapon effects power
