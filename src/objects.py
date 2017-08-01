@@ -103,7 +103,7 @@ class Door:
             self.owner.passable = True
             self.owner.representation = '-'
             
-    def toggle(self):
+    def toggle(self): #separate
         if self.lock_durability <= 0:
             if self.open == False:
                 print 'Openned'
