@@ -19,7 +19,7 @@ class Object_Place:
         
         self.x = x
         self.y = y
-        self.active_z = active_z        
+        self.active_z = active_z
         self.name = name
         self.representation = representation
         self.passable = passable
@@ -68,23 +68,22 @@ class Object_Place:
             self.x += dx
             self.y += dy
 
-            
+
 class Stairs:
-    def __init__(self, down=True):
-        self.down = down
+    def __init__(self, go_down=True):
+        # '<' up stair, '>' down stair.
+        self.go_down = go_down
         
-        if not self.down:
-            self.representation = '<'
         
     def use_stairs(self, unit, depth_index):
-        depth_index = depth_index + 1 if self.down else depth_index - 1
+        depth_index = depth_index + 1 if self.go_down else depth_index - 1
         
         OBJECT_CONTAINER.remove(unit)
         del OBJECT_CONTAINER[:]
         del WORLD_CONTAINER[:]
         OBJECT_CONTAINER.append(unit)
-        
-        map_gen.generate(grid_z=depth_index, down=self.down)
+
+        map_gen.generate(depth_index, self.go_down)
         unit.active_z = depth_index
     
     
@@ -105,18 +104,24 @@ class Door:
             
     def toggle(self): #separate
         if self.lock_durability <= 0:
-            if self.open == False:
-                print 'Openned'
-                self.open = True
-                self.owner.representation = '-'
-                self.owner.passable = True
-            else:
-                print 'Closed'
-                self.open = False
-                self.owner.representation = '+'
-                self.owner.passable = False
+            self.try_use()
         else:
             print 'Door is locked.'
+            
+    def try_use(self):
+        if self.open == False:
+            self.open = True
+            self.owner.passable = True
+            self.owner.representation = '-'
+            print 'Openned'
+        else:
+            self.close_door()
+            
+    def close_door(self):
+        self.open = False
+        self.owner.passable = False
+        self.owner.representation = '+'
+        print 'Closed'
             
             
 class Storage:
@@ -137,6 +142,7 @@ class Storage:
             print self.owner.name, 'is empty.'
             return
         
+        # checking inventory might go into utils, this will need to become number and not string selection
         taking_item = check_inventory(self.contains)
         self.contains.remove(taking_item)
         units_inventory.append(taking_item)
@@ -299,7 +305,7 @@ class Equipment:
         creature.attire.remove(self.owner)
         creature.inventory.append(self.owner)
         print 'Taken {} off.'.format(self.owner.name)
-        
+
 
 def creature_death(corpse):
     corpse.creature = None

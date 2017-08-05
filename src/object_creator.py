@@ -63,7 +63,13 @@ class Create:
         
         self.rarity_value = rarity_value/100.
         
-    #def stairs(self):
+    def stairs(self, down=True):
+        stair_type = 'Down Stair' if down else 'Up Stair'
+        represent_stairs = '>' if down else '<'
+        
+        place_up_stair = (down)
+        stair_object = Stairs(place_up_stair)
+        entrance_stair = Object_Place(self.x, self.y, self.z, stair_type, represent_stairs, stairs=stair_object)    
     
     # Make these functions before making data.
     def food(self):

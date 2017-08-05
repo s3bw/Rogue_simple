@@ -5,23 +5,33 @@ from object_creator import Create
 # needed to object test
 from objects import *
 
-def generate(grid_z, down=True):
+def generate(grid_z, lower=True):
     # GRID defines the grid size, generate with define the biome, 
     # Thus: this is where we change the grid size and we wont pass it into generate.
+    
     map_area = Grid(grid_biome='village')
     WORLD_CONTAINER.append(map_area)
     
+    # Stairs
     if grid_z > 0:
-        [(entrance_stair_x, entrance_stair_y)] = [(object.x, object.y) for object in OBJECT_CONTAINER]
-        stair_object = Stairs(not down)
-        if down:
-            entrance_stair = Object_Place(entrance_stair_x, entrance_stair_y, grid_z, 'Up Stair', '<', stairs=stair_object)
-        else:
-            entrance_stair = Object_Place(entrance_stair_x, entrance_stair_y, grid_z, 'Down Stair', '>', stairs=stair_object)
-        OBJECT_CONTAINER.append(entrance_stair)
+        [(entrance_x, entrance_y)] = [(object.x, object.y) for object in OBJECT_CONTAINER]
+        stair_object = Stairs(not lower)
+        entrance = Object_Place(entrance_x, entrance_y, grid_z, 'Up Stair', '<', stairs=stair_object)
+        if not lower:
+            stair_object = Stairs(lower)
+            entrance = Object_Place(entrance_x, entrance_y, grid_z, 'Down Stair', '>', stairs=stair_object)            
+        OBJECT_CONTAINER.append(entrance)
+
+    exit_x, exit_y = map_area.exit_point
+    stair_object = Stairs(lower)
+    exit = Object_Place(exit_x, exit_y, grid_z, 'Down Stair', '>', stairs=stair_object)
+    if not lower and grid_z > 0:
+        stair_object = Stairs(lower)
+        exit = Object_Place(exit_x, exit_y, grid_z, 'Up Stair', '<', stairs=stair_object)
+    OBJECT_CONTAINER.append(exit)
+        
     
-    place = Create(grid_z)
-    food = place.food()
+    food = Create(grid_z).food()
 
     bucket_storage = Storage(capacity=25, contains=[food])
     bucket = Object_Place(5, 3, grid_z, 'bucket', 'u', storage=bucket_storage)
@@ -43,6 +53,7 @@ def generate(grid_z, down=True):
         structure_value = building.room.value
         
         for (x, y) in building.room.door_space:
+            # need unlocked doors on shop and low value houses
             place = Create(x, y, grid_z, structure_value)
             door = place.door()
             OBJECT_CONTAINER.append(door)
@@ -58,11 +69,4 @@ def generate(grid_z, down=True):
                 # animal = obj.create_tame_animal(x, y, map_area)
             OBJECT_CONTAINER.append(animal)
 
-    stair_object = Stairs(down)
-    exit_stair_x, exit_stair_y = map_area.point_of_stair    
-    if not down:
-        exit_stair = Object_Place(exit_stair_x, exit_stair_y, grid_z, 'Up Stair', '<', stairs=stair_object)
-    else:
-        exit_stair = Object_Place(exit_stair_x, exit_stair_y, grid_z, 'Down Stair', '>', stairs=stair_object)
-    OBJECT_CONTAINER.append(exit_stair)
  
