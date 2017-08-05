@@ -70,11 +70,10 @@ def player_toggle_door(user):
 
 def player_travel_z(user, depth_index):
     user_inventory = user.creature.inventory
-    print 'function use'
+
     for object in OBJECT_CONTAINER:
         print object.name
         if object != user and object.x == user.x and object.y == user.y and object.stairs:
-            print 'in loop use', object.name, user.name
             object.stairs.use_stairs(user, depth_index)
             break
         
