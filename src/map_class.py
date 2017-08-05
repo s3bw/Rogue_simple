@@ -4,6 +4,7 @@ from containers import *
 
 DEFAULT_GRID_X = 20
 DEFAULT_GRID_Y = 20
+MAX_ATTEMPTS = 20
 MAX_SIZE_ROOM = 7
 MIN_SIZE_ROOM = 4
 ROOM_AREA = MAX_SIZE_ROOM * MAX_SIZE_ROOM
@@ -19,6 +20,18 @@ class Rect:
         self.x2 = x + h
         self.y2 = y + v
         
+        #Look into compartmentalising large rooms
+        #Look into slightly roundifying rooms on length of edges
+        #   -------          --------
+        #   |     |          |      |
+        #   |     |  -->    /        \
+        #   |     |  -->   |          |
+        #   |     |  -->   |          |
+        #   |     |  -->    \        /
+        #   |     |          |      |
+        #   -------          --------
+        self.area = h * v
+                
         self.room = room
         
         if self.room:
@@ -29,13 +42,16 @@ class Rect:
         center_y = (self.y1 + self.y2) / 2
         return (center_x, center_y)
         
-    def intersect(self, other):
-        return (
-            self.x1 <= other.x2 
-            and self.x2 >= other.x1
-            and self.y1 <= other.y2
-            and self.y2 >= other.y1
-        )
+    def intersect(self, other, steps_away=0):
+        other_x1 = other.x1 - steps_away
+        other_y1 = other.y1 - steps_away
+        other_x2 = other.x2 + steps_away
+        other_y2 = other.y2 + steps_away
+        
+        return (self.x1 <= other_x2
+            and self.y1 <= other_y2
+            and self.x2 >= other_x1
+            and self.y2 >= other_y1)
         
     def rectangle(self, x, y):
         return (self.x1 <= x <= self.x2 and self.y1 <= y <= self.y2)
@@ -43,6 +59,7 @@ class Rect:
     def internal(self, x, y):
         return (self.x1 < x < self.x2 and self.y1 < y < self.y2)
         
+    # Look into simplifiying these two below
     def edges(self, x, y):
         return (self.x1 == x and self.y1 <= y <= self.y2) \
             or (self.x2 == x and self.y1 <= y <= self.y2) \
@@ -54,6 +71,7 @@ class Rect:
             or (self.x2 == x and self.y1 < y < self.y2) \
             or (self.y1 == y and self.x1 < x < self.x2) \
             or (self.y2 == y and self.x1 < x < self.x2)
+
         
 class Room:
     def __init__(self, grid, value=0, room_objects=None, doors=None):
@@ -61,6 +79,7 @@ class Room:
         self.doors = doors
         self.room_objects = room_objects
         
+        #Instead of h and v we need x and y - h and v is probably ok, double check consistency
         grid_h = range(grid.grid_h)
         grid_v = range(grid.grid_v)
         self.grid_space = [ (x, y) for x in grid_h for y in grid_v]
@@ -108,18 +127,18 @@ class Grid:
         
         self.biome = grid_biome
         self.create_grid()
-
-    def create_stair(self):
-        stair_space = []
-        for y in range(self.grid_h):
-            for x in range(self.grid_v):
-                if not self.grid[x][y].blocked:
-                    stair_space .append((x, y))    
         
-        pick_stairs = random.randint(1, len(stair_space) - 1)
-        
-        self.point_of_stair = stair_space[pick_stairs]
-        
+        self.allocate_room_space()
+        self.place_walls()
+        self.allocate_exit()
+            
+        # Space allocation
+        # --> Some kinda random_noise to make random outside objects,
+        # --> Invert the room to make caverns
+        # --> Tunnel space
+        # --> Think about slightly differing tile colours
+            
+            
     def create_grid(self):
         self.grid = [[
             Tile(False)
@@ -127,57 +146,70 @@ class Grid:
                 for y in range(self.grid_v)
             ]
 
+    def allocate_exit(self):
+        possible_space = []
+        for y in range(self.grid_h):
+            for x in range(self.grid_v):
+                if not self.grid[x][y].blocked:
+                    possible_space.append((x, y))    
+        
+        selected_index = random.randint(1, len(possible_space) - 1)
+        
+        self.exit_point = possible_space[selected_index]
+        
+        
+    def allocate_room_space(self):
         calculate_space =  (self.grid_area*(1- WALKING_AREA)) / ROOM_AREA
         
         self.rooms = []
         space_for_rooms = calculate_space
         while space_for_rooms > 1:
-            room_h = room_length()
-            room_v = room_length()
-            new_room = self.create_room(self.rooms, room_h, room_v)
+            new_room = self.create_room(self.rooms)
             
             if new_room == False:
-                print 'Map Rejected'
                 self.rooms = []
                 space_for_rooms = calculate_space
+                print 'Map Rejected'
             
             else:
-                space_for_rooms -= 1                
+                space_for_rooms -= 1
                 self.rooms.append(new_room)
+            
+    def create_room(self, rooms):
+        grid_max_x = lambda length: self.grid_h - length - 1
+        grid_max_y = lambda length: self.grid_v - length - 1
         
+        attempts = 0
+        valid_room = False
+        while valid_room == False and MAX_ATTEMPTS >= attempts:
+            new_h = room_length()
+            new_v = room_length()
+            max_x = grid_max_x(new_h)
+            max_y = grid_max_y(new_v)
+            new_value = random.randint(0,100)
+            new_x = random.randint(5, max_x)
+            new_y = random.randint(5, max_y)
+            
+            room_component = Room(grid=self, value=new_value, doors=2, room_objects=2)
+            map_object = Rect(new_x, new_y, new_h, new_v, room=room_component)
+            
+            valid_room = not any(created_room.intersect(map_object, steps_away=1) for created_room in rooms)
+            attempts += 1
+            
+        if valid_room:
+            map_object.room.define_spaces()
+            return map_object
+            
+        return False
+
+    def place_walls(self):
         for y in range(self.grid_h):
             for x in range(self.grid_v):
                 if any(map_object.edges(x,y) and (x,y) not in map_object.room.door_space for map_object in self.rooms):
                     self.grid[x][y].make_wall()
                     self.grid[x][y].blocked = True
                     
-        self.create_stair()
         # Include types of maps gen - above ground/below
-            
-    def create_room(self, rooms, new_h, new_v):
-        max_x = self.grid_h - new_h - 1
-        max_y = self.grid_v - new_v - 1
-        
-        attempts = 0
-        valid_room = False
-        while valid_room == False:
-        
-            attempts += 1
-            if attempts == 20:
-                return False
-            
-            new_x = random.randint(5, max_x)
-            new_y = random.randint(5, max_y)
-            
-            new_value = random.randint(0,100)
-            room_component = Room(self, value=new_value, doors=2, room_objects=2)
-            map_object = Rect(new_x, new_y, new_h, new_v, room=room_component)
-            
-            # Valid room check
-            if not any(created_room.intersect(map_object) for created_room in rooms):
-                map_object.room.define_spaces()
-                return map_object
-                
         
     def show(self):
         for grid_y in self.grid:
