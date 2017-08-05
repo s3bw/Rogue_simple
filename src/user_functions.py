@@ -72,9 +72,10 @@ def player_travel_z(user, depth_index):
     user_inventory = user.creature.inventory
 
     for object in OBJECT_CONTAINER:
+        print object.name
         if object != user and object.x == user.x and object.y == user.y and object.stairs:
             object.stairs.use_stairs(user, depth_index)
-            
+            break
         
 def player_equip_item(user):
     user_inventory = user.creature.inventory
