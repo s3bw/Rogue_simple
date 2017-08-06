@@ -5,10 +5,10 @@ from containers import *
 DEFAULT_GRID_X = 20
 DEFAULT_GRID_Y = 20
 MAX_ATTEMPTS = 20
-MAX_SIZE_ROOM = 7
-MIN_SIZE_ROOM = 4
+MAX_SIZE_ROOM = 6
+MIN_SIZE_ROOM = 3
 ROOM_AREA = MAX_SIZE_ROOM * MAX_SIZE_ROOM
-WALKING_AREA = 0.75
+WALKING_AREA = 0.70
 
 def room_length():
     return random.randint(MIN_SIZE_ROOM, MAX_SIZE_ROOM)
@@ -88,19 +88,39 @@ class Room:
             self.doors = 1
             self.room_objects = 1
             
-    def allocate_spaces(self, space, allocate_item):
-        potential_spaces = len(space) - 1
-        space_index = [random.randint(1, potential_spaces) for n in range(allocate_item)]
-        return [space[index] for index in space_index]
+    def space_allocation(self):
+        self.door_places()
+        self.object_places()
         
-    def define_spaces(self):        
+    def allocate_spaces(self, space, number_to_select):
+        """Out of a list of co-ordinates this function chooses (int) 'number_to_select' co-ordinates."""
+        return random.sample(space, number_to_select)
+        
+    def door_places(self):        
         door_space = [(x, y) for (x, y) in self.grid_space if self.owner.sides(x, y)]
         self.door_space = self.allocate_spaces(door_space, self.doors)
         
-        object_space = [(x, y) for (x, y) in self.grid_space if self.owner.internal(x, y)]
+    def object_places(self):
+        object_space = [(x, y) for (x, y) in self.grid_space if self.owner.internal(x, y) and (x, y) != self.owner.center()]
+        object_space = self.clear_doorway(object_space)
         self.object_space = self.allocate_spaces(object_space, self.room_objects)
         del self.grid_space
-
+        
+    def clear_doorway(self, internal_space):
+        offsets = [(0,1),(0,-1),(1,0),(-1,0)]
+        main_door_x, main_door_y = self.door_space[0]
+        
+        door_way = [(main_door_x + dx, main_door_y + dy) for dx, dy in offsets]
+        internal_space = [(x, y) for x, y in internal_space if (x,y) not in door_way]
+        return internal_space
+        
+    def users_start(self):
+        self.user_space = self.owner.center()
+        print self.door_space[0]
+        self.door_space = self.door_space[:1]
+        #place bin on far side
+        self.bin_space = self.object_space[0]
+        self.object_space = []
 
         
 class Tile:
@@ -119,18 +139,17 @@ class Tile:
         
         
 class Grid:
-    def __init__(self, grid_h=DEFAULT_GRID_X, grid_v=DEFAULT_GRID_Y, grid_z=0, grid_biome='village'):
+    def __init__(self, grid_h=DEFAULT_GRID_X, grid_v=DEFAULT_GRID_Y, grid_z=0, grid_biome='village', first_grid=False, building_restriction=None):
         self.grid_h = grid_h
         self.grid_v = grid_v
         self.grid_z = grid_z
         self.grid_area = self.grid_h * self.grid_v
         
         self.biome = grid_biome
+        self.first_grid = first_grid
+        self.building_restriction = building_restriction
         self.create_grid()
         
-        self.allocate_room_space()
-        self.place_walls()
-        self.allocate_exit()
             
         # Space allocation
         # --> Some kinda random_noise to make random outside objects,
@@ -146,6 +165,10 @@ class Grid:
                 for y in range(self.grid_v)
             ]
 
+        self.allocate_room_space()
+        self.place_walls()
+        self.allocate_exit()
+        
     def allocate_exit(self):
         possible_space = []
         for y in range(self.grid_h):
@@ -174,6 +197,9 @@ class Grid:
             else:
                 space_for_rooms -= 1
                 self.rooms.append(new_room)
+                
+        if self.first_grid:
+            self.rooms[0].room.users_start()
             
     def create_room(self, rooms):
         grid_max_x = lambda length: self.grid_h - length - 1
@@ -187,17 +213,21 @@ class Grid:
             max_x = grid_max_x(new_h)
             max_y = grid_max_y(new_v)
             new_value = random.randint(0,100)
-            new_x = random.randint(5, max_x)
-            new_y = random.randint(5, max_y)
+            new_x = random.randint(1, max_x-1)
+            new_y = random.randint(1, max_y-1)
             
             room_component = Room(grid=self, value=new_value, doors=2, room_objects=2)
             map_object = Rect(new_x, new_y, new_h, new_v, room=room_component)
             
-            valid_room = not any(created_room.intersect(map_object, steps_away=1) for created_room in rooms)
+            if self.building_restriction:
+                valid_room = (not any(created_room.intersect(map_object, steps_away=1) for created_room in rooms)) \
+                    and all(not map_object.rectangle(x, y) for x, y in self.building_restriction)
+            else:
+                valid_room = not any(created_room.intersect(map_object, steps_away=1) for created_room in rooms)
             attempts += 1
             
         if valid_room:
-            map_object.room.define_spaces()
+            map_object.room.space_allocation()
             return map_object
             
         return False

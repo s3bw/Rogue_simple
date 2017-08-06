@@ -48,20 +48,12 @@ def render_map():
 
     print '-'*41
 
-    
+
     
 depth = 0
-map_gen.generate(grid_z=depth)
+map_gen.generate(grid_z=depth, start_game=True)
+user = OBJECT_CONTAINER[0]
 
-#PLAYER and PLAYER ITEMS
-long_sword_item = Item(weight=5, value=60)
-sword_equip = Equipment(['Main-Hand','Off-Hand'], magnitute=125, optional_slot=True, equipped_slot='Main-Hand', affect='power')
-sword = Object_Place(None, None, depth, 'Long Sword', '/', item=long_sword_item, equipment=sword_equip)
-
-player = Creature(hp=50, power=5, death=creature_death, inventory=[], attire=[sword])
-user = Object_Place(5, 5, depth, 'Player Character', '@', creature=player)
-user.creature.hp -= 20
-OBJECT_CONTAINER.append(user)
 
 # key presses
 game_state = True

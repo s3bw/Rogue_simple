@@ -95,8 +95,11 @@ class Door:
         self.open = open
         
     def reduce_durability(self, damage):
-        damage = damage * (1 - self.lock_strength)
-        self.lock_durability -= int(damage)
+        damage = float(damage) * (1 - self.lock_strength)
+        # door strength should be exponential.
+        # after one hit a suggestion of how long
+        # it will take to get in should appear
+        self.lock_durability -= damage
         if self.lock_durability <= 0:
             self.open = True
             self.owner.passable = True
@@ -156,7 +159,7 @@ class Storage:
             self.contains.append(storing_item)
             
         elif storing_item:
-            print '{} is full.'.format(self.owner.name)
+            print "Can't fit {} in {}.".format(storing_item.name, self.owner.name)
         
 
 equip_bonus = lambda entity, attribute: sum(
