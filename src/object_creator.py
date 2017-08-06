@@ -122,7 +122,7 @@ class Create:
             optional_slot = False
         
         weapon_item = Item(weight=weight, value=value)
-        weapon_equip = Equipment(slots, magnitute=magnitute, optional_slot=optional_slot, affect='power')
+        weapon_equip = Equipment(slots, magnitute=magnitute, optional_slot=optional_slot, affect_attribute='power')
         weapon = Object_Place(self.x, self.y, self.z, weapon_name, '/', item=weapon_item, equipment=weapon_equip)
         return weapon
 
