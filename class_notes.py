@@ -18,7 +18,7 @@ Child - (magic gloves, knife) - (shortsword) - (punch)
     - weak, small, powerful magic
     - speed = 100    
 Owl - (staff, cross_bow) - (knife) - (claw)
-    - sneaky, wise, agile
+    - sneaky, wise, agile, bonus enchant 
     - speed = 90    
 Rhino - (Great Sword, Great Hammer) - (shield bash) - (horn)
     - large, strong, defensive

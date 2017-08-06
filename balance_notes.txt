@@ -1,0 +1,11 @@
+"The game's monster difficulty should increase slightly faster than the advancement of the player,
+ given average stats and default equipment, so as to force him to rely upon items and tactics.
+
+The reasoning here is that if the player doesn't have to rely on randomly-found stuff they 
+will likely lose interest in playing. However, if it's required to have specific items to be 
+successful then many games will be outright unwinnable. The balance between these two poles 
+is what makes random dungeon generation difficult, but it's also part of what makes random dungeon 
+gameplay interesting."
+
+ - http://www.gamasutra.com/view/news/123031/Analysis_The_Eight_Rules_Of_Roguelike_Design.php
+
