@@ -6,10 +6,10 @@ from object_creator import Create
 from objects import *
 
 def spawn_player(x, y, z):
+    # Starting item should depend on class
     long_sword_item = Item(weight=400, value=60)
     sword_equip = Equipment(['Main-Hand','Off-Hand'], magnitute=1250, optional_slot=True, equipped_slot='Main-Hand', affect='power')
     sword = Object_Place(None, None, None, 'The Dragonslayer', '/', item=long_sword_item, equipment=sword_equip)
-
 
     player = Creature(hp=50, power=5, death=creature_death, inventory=[], attire=[sword])
     user = Object_Place(x, y, z, 'Player Character', '@', creature=player)
@@ -21,18 +21,21 @@ def spawn_player(x, y, z):
 def generate(grid_z, lower=True, start_game=False):
     # GRID defines the grid size, generate with define the biome, 
     # Thus: this is where we change the grid size and we wont pass it into generate.
-    
-    map_area = Grid(grid_biome='village', first_grid=start_game)
+    restricted_places = None
+    if not start_game:
+        restricted_places = [(object.x, object.y) for object in OBJECT_CONTAINER]
+        [(entrance_x, entrance_y)] = restricted_places
+        
+    map_area = Grid(grid_biome='village', first_grid=start_game, building_restriction=restricted_places)
     WORLD_CONTAINER.append(map_area)
     
     
     # Stairs
     if grid_z > 0:
-        [(entrance_x, entrance_y)] = [(object.x, object.y) for object in OBJECT_CONTAINER]
         stair_object = Stairs(not lower)
         entrance = Object_Place(entrance_x, entrance_y, grid_z, 'Up Stair', '<', stairs=stair_object)
         if not lower:
-            stair_object = Stairs(lower)
+            stair_object = Stairs(not lower)
             entrance = Object_Place(entrance_x, entrance_y, grid_z, 'Down Stair', '>', stairs=stair_object)            
         OBJECT_CONTAINER.append(entrance)
 
@@ -71,7 +74,7 @@ def generate(grid_z, lower=True, start_game=False):
             
             x, y = building.room.bin_space
             food = Create(grid_z).food()
-            bucket_storage = Storage(capacity=2, contains=[food])
+            bucket_storage = Storage(capacity=5, contains=[food])
             bucket = Object_Place(x, y, grid_z, 'bucket', 'u', storage=bucket_storage)
             OBJECT_CONTAINER.append(bucket)
             

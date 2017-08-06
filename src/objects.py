@@ -95,8 +95,11 @@ class Door:
         self.open = open
         
     def reduce_durability(self, damage):
-        damage = damage * (1 - self.lock_strength)
-        self.lock_durability -= int(damage)
+        damage = float(damage) * (1 - self.lock_strength)
+        # door strength should be exponential.
+        # after one hit a suggestion of how long
+        # it will take to get in should appear
+        self.lock_durability -= damage
         if self.lock_durability <= 0:
             self.open = True
             self.owner.passable = True

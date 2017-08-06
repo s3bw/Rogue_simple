@@ -8,6 +8,15 @@ Material Dictionaries:
 - Metal_Data
 
 '''
+Stone_Data = {
+    'sandstone': {
+        'strength': 10,
+        'value': 5,
+        'weight': 10,
+        'rarity': 5
+    }
+}
+
 
 Textile_Data = {
     'linen': {

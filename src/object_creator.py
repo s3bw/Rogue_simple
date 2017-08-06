@@ -29,7 +29,8 @@ class Select_Material:
             materials.update(mat.Wood_Data)
         if 'textile' in self.material_list:
             materials.update(mat.Textile_Data)
-        # include stone
+        if 'stone' in self.material_list:
+            materials.update(mat.Stone_Data)
         return self.choose_material(materials)        
         
     def filter_less_than(self, materials_dict):

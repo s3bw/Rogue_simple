@@ -48,16 +48,11 @@ def render_map():
 
     print '-'*41
 
-    
+
     
 depth = 0
 map_gen.generate(grid_z=depth, start_game=True)
 user = OBJECT_CONTAINER[0]
-
-
-#PLAYER and PLAYER ITEMS
-
-
 
 
 # key presses
