@@ -1,10 +1,13 @@
-from containers import OBJECT_CONTAINER, WORLD_CONTAINER
+import shelve
+
 import generate_map as map_gen
+from containers import OBJECT_CONTAINER, WORLD_CONTAINER
 from death_scenes import *
 from item_uses import *
 from user_functions import check_inventory
 # from src.message import Message
 
+INFINITY_DATA = './src/infinity_data/'
 
 class Object_Place:
     def __init__(self, 
@@ -130,9 +133,19 @@ class Door:
 class Storage:
     # Storage object will become infinity chests - item save between plays
     # Once an item goes in it can only be taken out in other play through
-    def __init__(self, capacity, contains=None):
+    def __init__(self, capacity, contains=None, infinity_id=None, is_infinity=False):
         self.max_capacity = capacity
         self.contains = contains
+        self.infinity_id = infinity_id
+        self.is_infinity = is_infinity
+        
+        if is_infinity:
+            try:
+                infinity_data = shelve.open('{}game_save.txt'.format(INFINITY_DATA))
+                self.contains = infinity_data[self.infinity_id]
+                infinity_data.close()
+            except:
+                self.contains = contains
 
     @property
     def remaining_capacity(self):
