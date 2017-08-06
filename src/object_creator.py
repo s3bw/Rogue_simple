@@ -74,7 +74,7 @@ class Create:
     
     # Make these functions before making data.
     def food(self):
-        food_item = Item(weight=3, value=5, intensity=0.1, has_use=healing_item)
+        food_item = Item(weight=3, value=5, intensity=0.1, has_use=healing_item, use_verb='eat')
         food = Object_Place(self.x, self.y, self.z, 'Carrot', 'v', item=food_item)
         return food
         

@@ -249,11 +249,12 @@ class Creature:
 
         
 class Item:
-    def __init__(self, weight, value, intensity=0, has_use=None):
+    def __init__(self, weight, value, intensity=0, has_use=None, use_verb=None):
         self.weight = weight
         self.value = value
         self.intensity = intensity
         self.has_use = has_use
+        self.use_verb = use_verb
     
     def pick_up(self):
         OBJECT_CONTAINER.remove(self.owner)
@@ -266,7 +267,7 @@ class Item:
         
     def use(self, use_on):
         if self.has_use is not None:
-            self.has_use(self, use_on.creature)
+            self.has_use(self, use_on.creature, self.use_verb)
 
         
 class Equipment:
