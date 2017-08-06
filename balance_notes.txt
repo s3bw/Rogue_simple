@@ -1,0 +1,27 @@
+"The game's monster difficulty should increase slightly faster than the advancement of the player,
+ given average stats and default equipment, so as to force him to rely upon items and tactics.
+
+The reasoning here is that if the player doesn't have to rely on randomly-found stuff they 
+will likely lose interest in playing. However, if it's required to have specific items to be 
+successful then many games will be outright unwinnable. The balance between these two poles 
+is what makes random dungeon generation difficult, but it's also part of what makes random dungeon 
+gameplay interesting."
+
+ - http://www.gamasutra.com/view/news/123031/Analysis_The_Eight_Rules_Of_Roguelike_Design.php
+
+"For example, for the implementation of a simple ‘Combat’ Action, you may decide that your variables 
+to calculate the ‘Strength of the blow’ are:
+
+The ‘strength’ of the performer
+The ‘proficiency’ with the given weapon kind
+The ‘strength’ of the weapon
+You will also need to calculate the chance for the blow to fail, and state the following variables:
+
+The dexterity of the enemy
+The weight of the enemy
+The evade bonus of the enemy, based on his equipped accesories
+Finally you will need some sort of health, so that the final effect of the blow is perceived."
+
+ - http://www.roguetemple.com/articles/stat-balancing-in-roguelikes/
+
+
