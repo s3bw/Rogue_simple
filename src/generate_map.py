@@ -5,12 +5,26 @@ from object_creator import Create
 # needed to object test
 from objects import *
 
-def generate(grid_z, lower=True):
+def spawn_player(x, y, z):
+    long_sword_item = Item(weight=400, value=60)
+    sword_equip = Equipment(['Main-Hand','Off-Hand'], magnitute=1250, optional_slot=True, equipped_slot='Main-Hand', affect='power')
+    sword = Object_Place(None, None, None, 'The Dragonslayer', '/', item=long_sword_item, equipment=sword_equip)
+
+
+    player = Creature(hp=50, power=5, death=creature_death, inventory=[], attire=[sword])
+    user = Object_Place(x, y, z, 'Player Character', '@', creature=player)
+    user.creature.hp -= 20
+    return user 
+    
+
+
+def generate(grid_z, lower=True, start_game=False):
     # GRID defines the grid size, generate with define the biome, 
     # Thus: this is where we change the grid size and we wont pass it into generate.
     
-    map_area = Grid(grid_biome='village')
+    map_area = Grid(grid_biome='village', first_grid=start_game)
     WORLD_CONTAINER.append(map_area)
+    
     
     # Stairs
     if grid_z > 0:
@@ -31,11 +45,7 @@ def generate(grid_z, lower=True):
     OBJECT_CONTAINER.append(exit)
         
     
-    food = Create(grid_z).food()
 
-    bucket_storage = Storage(capacity=25, contains=[food])
-    bucket = Object_Place(5, 3, grid_z, 'bucket', 'u', storage=bucket_storage)
-    OBJECT_CONTAINER.append(bucket)
     
     make_weapon = Create(7, 5, grid_z).weapon()
     OBJECT_CONTAINER.append(make_weapon)
@@ -48,10 +58,25 @@ def generate(grid_z, lower=True):
     final_animal = Object_Place(5, 7, grid_z, 'pig', 'p', creature=animal_object)
     OBJECT_CONTAINER.append(final_animal)
 
+  #  if start_game == True:
+        #Place the player in the user_space
+        
+    # Place Objects in spaces
     for building in map_area.rooms:
+        if hasattr(building.room, 'user_space'):
+            print 'user spawned'
+            x, y = building.room.user_space
+            user = spawn_player(x, y, grid_z)
+            OBJECT_CONTAINER.insert(0, user)
+            
+            x, y = building.room.bin_space
+            food = Create(grid_z).food()
+            bucket_storage = Storage(capacity=2, contains=[food])
+            bucket = Object_Place(x, y, grid_z, 'bucket', 'u', storage=bucket_storage)
+            OBJECT_CONTAINER.append(bucket)
+            
         # should pass 'structure_value' into the creation property distribution
         structure_value = building.room.value
-        
         for (x, y) in building.room.door_space:
             # need unlocked doors on shop and low value houses
             place = Create(x, y, grid_z, structure_value)

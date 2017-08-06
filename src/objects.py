@@ -156,7 +156,7 @@ class Storage:
             self.contains.append(storing_item)
             
         elif storing_item:
-            print '{} is full.'.format(self.owner.name)
+            print "Can't fit {} in {}.".format(storing_item.name, self.owner.name)
         
 
 equip_bonus = lambda entity, attribute: sum(

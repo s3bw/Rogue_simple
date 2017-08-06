@@ -94,7 +94,7 @@ class Create:
     def door(self):
         material, attributes = Select_Material(self.rarity_value, material_list=['metal', 'wood']).get()
         strength = attributes['strength']/40.
-        weight = attributes['weight']
+        weight = attributes['weight']/10
         
         name = '{} door'.format(material)       
         door_object = Door(lock_strength=strength, lock_durability=weight)
