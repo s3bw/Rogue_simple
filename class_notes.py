@@ -11,16 +11,21 @@ hp:     ===+++
 Fox -  (knife, shortsword) - (Great Sword) - (bite)
     - sneaky, quick, versitile
     - speed = 90
+    - carry weight = 30
 Hedgehog - (axe, spear) - (knife) - (spike)
     - short, slow, defensive
     - speed = 110
+    - carry weight = 30
 Child - (magic gloves, knife) - (shortsword) - (punch)
     - weak, small, powerful magic
-    - speed = 100    
+    - speed = 100
+    - carry weight = 30
 Owl - (staff, cross_bow) - (knife) - (claw)
-    - sneaky, wise, agile, bonus enchant 
-    - speed = 90    
+    - sneaky, wise, agile, bonus enchant, carry less
+    - speed = 90
+    - carry weight = 25
 Rhino - (Great Sword, Great Hammer) - (shield bash) - (horn)
-    - large, strong, defensive
+    - large, strong, defensive, carry more
     - speed = 110
+    - carry weight = 50
 """

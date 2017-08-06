@@ -36,11 +36,12 @@ def render_map():
     
     print 'Depth:', user.active_z, len(WORLD_CONTAINER)
     print 'Attire: ', [k.name for k in user.creature.attire]    
-    print 'Added Power: ', sum(k.equipment.magnitute for k in user.creature.attire if k.equipment.affect == 'power')
+    print 'Added Power: ', sum(k.equipment.magnitute for k in user.creature.attire if k.equipment.affect_attribute == 'power')
     print 'Inventory: ', [k.name for k in user.creature.inventory]    
     print 'Net Worth: ', sum(k.item.value for k in user.creature.inventory + user.creature.attire)
     print 'Net Weight: ', sum(k.item.weight for k in user.creature.inventory + user.creature.attire)
     print 'User HP: {}/{}'.format(str(user.creature.hp), str(user.creature.max_hp))
+    
     
     for object in OBJECT_CONTAINER:
         if object.creature:

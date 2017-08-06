@@ -1,4 +1,5 @@
 import shelve
+import random
 
 import generate_map as map_gen
 from containers import OBJECT_CONTAINER, WORLD_CONTAINER
@@ -178,7 +179,7 @@ class Storage:
 equip_bonus = lambda entity, attribute: sum(
     wearing_item.equipment.magnitute 
     for wearing_item in entity.attire 
-    if wearing_item.equipment.affect == attribute
+    if wearing_item.equipment.affect_attribute == attribute
 )
     
 class Creature:
@@ -219,7 +220,18 @@ class Creature:
                 print '{} has {} remaining HP.'.format(self.owner.name, self.hp)
 
     def attack(self, target):
+        # assign to self for more attributes.
+        # figure out how we will use inscription in doing crit
+        # Targeting should effect crit chance and amount
+        # Crit-splotion
+        crit_effect = 2
+        crit_chance = 20
+        check_crit = random.randint(0,100)
         damage = self.power
+        if check_crit < crit_chance:
+            print 'Crit hit'
+            damage = (self.power * crit_effect)
+            
         if damage > 0:
             attacker = self.owner
             print '{} has hit {} with {} worth of damage!'.format(attacker.name, target.name, damage)
@@ -249,12 +261,17 @@ class Creature:
 
         
 class Item:
-    def __init__(self, weight, value, intensity=0, has_use=None, use_verb=None):
+    def __init__(self, weight, value, intensity=0, 
+            has_use=None, 
+            use_verb=None, 
+            inscribe_affect=None
+        ):
         self.weight = weight
         self.value = value
         self.intensity = intensity
         self.has_use = has_use
         self.use_verb = use_verb
+        self.inscribe_affect = inscribe_affect
     
     def pick_up(self):
         OBJECT_CONTAINER.remove(self.owner)
@@ -269,24 +286,47 @@ class Item:
         if self.has_use is not None:
             self.has_use(self, use_on.creature, self.use_verb)
 
-        
+
+inscription_bonus = lambda equipt, attribute: sum(
+    script.intensity 
+    for script in equipt.inscriptions 
+    if script.inscribe_affect == attribute
+)
+
 class Equipment:
-    def __init__(self, slots, magnitute, optional_slot=True, equipped_slot=None, affect=None):
+    def __init__(self, slots, magnitute, optional_slot=True, equipped_slot=None, 
+            affect_attribute=None, 
+            inscriptions=None,
+            can_inscribe=True
+        ):
+        # Slot Handling
         self.slots = slots
         self.optional_slot = optional_slot
         self.equipped_slot = equipped_slot
         self.is_equipped = False
         
-        self.magnitute = magnitute
-        self.affect = affect
+        # Affect Handling
+        self.base_magnitute = magnitute
+        #self.base_magnitute = magnitute
+        self.affect_attribute = affect_attribute
+        self.inscriptions = inscriptions
+        if inscriptions is None:
+            self.inscriptions = []
+        self.can_inscribe = can_inscribe
 
         all_attire = [
             entity.creature.attire 
-            for entity in OBJECT_CONTAINER 
+            for entity in OBJECT_CONTAINER
             if entity.creature
         ]
         if self not in OBJECT_CONTAINER and (self in all_attire):
             self.is_equipped = True
+            
+    @property
+    def magnitute(self):
+        if self.inscriptions:
+            return self.base_magnitute * (1 + inscription_bonus(self, 'magnitute'))
+        return self.base_magnitute
         
         
     def toggle_equip(self, unit):
