@@ -9,6 +9,7 @@ gameplay interesting."
 
  - http://www.gamasutra.com/view/news/123031/Analysis_The_Eight_Rules_Of_Roguelike_Design.php
 
+
 "For example, for the implementation of a simple ‘Combat’ Action, you may decide that your variables 
 to calculate the ‘Strength of the blow’ are:
 
@@ -23,5 +24,3 @@ The evade bonus of the enemy, based on his equipped accesories
 Finally you will need some sort of health, so that the final effect of the blow is perceived."
 
  - http://www.roguetemple.com/articles/stat-balancing-in-roguelikes/
-
-
