@@ -54,7 +54,6 @@ depth = 0
 map_gen.generate(grid_z=depth, start_game=True)
 user = OBJECT_CONTAINER[0]
 
-
 # key presses
 game_state = True
 while game_state == True:
@@ -62,6 +61,7 @@ while game_state == True:
     
     user_input = raw_input('Where to?')
     if user_input == 'exit':
+        save_infinity_chests()
         break
         
     if user_input == '>' or user_input == '<':

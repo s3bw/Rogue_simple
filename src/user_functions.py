@@ -1,6 +1,8 @@
 from containers import *
 from objects import *
 
+INFINITY_DATA = '.\\src\\infinity_data\\'
+
 MOVES = {
     'up': [-1,0],
     'down': [1,0],
@@ -47,6 +49,13 @@ def player_move(user, user_input):
             user.move(dx, dy)        
     else:
         user.move(dx, dy)
+        
+def save_infinity_chests():
+    for object in OBJECT_CONTAINER:
+        if object.storage and object.storage.is_infinity:
+            infinity_data = shelve.open('{}game_save.txt'.format(INFINITY_DATA))
+            infinity_data[object.storage.infinity_id] = object.storage.contains
+            infinity_data.close()
 
 def player_query_storage(user):
     area_around_user = [(dx + user.x, dy + user.y) for (dx, dy) in OFF_SETS]
@@ -70,11 +79,11 @@ def player_toggle_door(user):
 
 def player_travel_z(user, depth_index):
     user_inventory = user.creature.inventory
-
     for object in OBJECT_CONTAINER:
         print object.name
         if object != user and object.x == user.x and object.y == user.y and object.stairs:
             object.stairs.use_stairs(user, depth_index)
+            save_infinity_chests()
             break
         
 def player_equip_item(user):

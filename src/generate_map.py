@@ -11,7 +11,8 @@ def spawn_player(x, y, z):
     sword_equip = Equipment(['Main-Hand','Off-Hand'], magnitute=1250, optional_slot=True, equipped_slot='Main-Hand', affect='power')
     sword = Object_Place(None, None, None, 'The Dragonslayer', '/', item=long_sword_item, equipment=sword_equip)
 
-    player = Creature(hp=50, power=5, death=creature_death, inventory=[], attire=[sword])
+    food = Create(z).food()
+    player = Creature(hp=50, power=5, death=creature_death, inventory=[food], attire=[sword])
     user = Object_Place(x, y, z, 'Player Character', '@', creature=player)
     user.creature.hp -= 20
     return user 
@@ -74,7 +75,7 @@ def generate(grid_z, lower=True, start_game=False):
             
             x, y = building.room.bin_space
             food = Create(grid_z).food()
-            bucket_storage = Storage(capacity=5, contains=[food])
+            bucket_storage = Storage(capacity=6, contains=[food], infinity_id='user_house', is_infinity=True)
             bucket = Object_Place(x, y, grid_z, 'bucket', 'u', storage=bucket_storage)
             OBJECT_CONTAINER.append(bucket)
             
