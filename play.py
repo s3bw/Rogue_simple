@@ -41,7 +41,7 @@ def render_map():
     print 'Net Worth: ', sum(k.item.value for k in user.creature.inventory + user.creature.attire)
     print 'Net Weight: ', sum(k.item.weight for k in user.creature.inventory + user.creature.attire)
     print 'User HP: {}/{}'.format(str(user.creature.hp), str(user.creature.max_hp))
-    
+    print 'User Defence: {}'.format(str(user.creature.defence))
     
     for object in OBJECT_CONTAINER:
         if object.creature:
@@ -64,6 +64,9 @@ while game_state == True:
     if user_input == 'exit':
         save_infinity_chests()
         break
+        
+    if user_input == 'stat':
+        object_stats()
         
     if user_input == '>' or user_input == '<':
         player_travel_z(user, user.active_z)

@@ -19,7 +19,7 @@ def inscribe_glyph(inscription, used_on_creature, verb):
         print 'The chosen item is:', inscribing.name
         inscribing.equipment.inscriptions.append(inscription)
         print inscribing.equipment.inscriptions
-    # Saves item if used incorrectly
+    # This saves item if used incorrectly
     else:
         print "Can't Inscribe That Item!"
         used_on_creature.inventory.append(inscription.owner)

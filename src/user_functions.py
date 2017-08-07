@@ -50,6 +50,12 @@ def player_move(user, user_input):
     else:
         user.move(dx, dy)
         
+def object_stats():
+    stat_object = check_inventory(OBJECT_CONTAINER)
+    for key, value in  stat_object.__dict__.iteritems():
+        if key == 'equipment':
+            print stat_object.__dict__[key].__dict__
+        
 def save_infinity_chests():
     for object in OBJECT_CONTAINER:
         if object.storage and object.storage.is_infinity:
