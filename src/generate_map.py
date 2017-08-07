@@ -1,13 +1,23 @@
 from containers import *
 from map_class import Grid
 from object_creator import Create
-
+from data.class_species import Species_Options
 # needed to object test
 from objects import *
 
 from item_uses import *
 
+
 def spawn_player(x, y, z):
+    # species is random atm.
+    species_keys = Species_Options.keys()
+    species_name = random.choice(species_keys)
+    species = Species_Options[species_name]
+    
+    representation = species['representation']
+    defence = species['defence']
+    species_name = '{} Player'.format(species_name)
+    
     # Starting item should depend on class
     long_sword_item = Item(weight=400, value=60)
     sword_equip = Equipment(['Main-Hand','Off-Hand'], magnitute=1250, optional_slot=True, equipped_slot=['Main-Hand'], affect_attribute='power')
@@ -24,13 +34,25 @@ def spawn_player(x, y, z):
     ring = Object_Place(None, None, None, 'Ring Of Health', 'o', item=ring_item, equipment=ring_equip)
     
     food = Create(z).food()
-    player = Creature(hp=50, power=5, defence=0.1, death=creature_death, inventory=[food, crit_glyph, power_glyph], attire=[sword, ring])
-    user = Object_Place(x, y, z, 'Player Character', '@', creature=player)
+    player = Creature(hp=50, power=5, defence=defence, death=creature_death, inventory=[food, crit_glyph, power_glyph], attire=[sword, ring])
+    user = Object_Place(x, y, z, species_name, representation, creature=player)
     user.creature.hp -= 20
     return user 
+
     
+def build_user_house(user_space, bin_space, z):
+    """I can use this to add an additonal item inside the house where the player spawns."""
+    x, y = user_space
+    user = spawn_player(x, y, z)
+    OBJECT_CONTAINER.insert(0, user)
+    
+    x, y = bin_space
+    food = Create(z).food()
+    bucket_storage = Storage(capacity=6, contains=[food], infinity_id='user_house', is_infinity=True)
+    bucket = Object_Place(x, y, z, 'bucket', 'u', storage=bucket_storage)
+    OBJECT_CONTAINER.append(bucket)
 
-
+    
 def generate(grid_z, lower=True, start_game=False):
     # GRID defines the grid size, generate with define the biome, 
     # Thus: this is where we change the grid size and we wont pass it into generate.
@@ -82,15 +104,8 @@ def generate(grid_z, lower=True, start_game=False):
     for building in map_area.rooms:
         if hasattr(building.room, 'user_space'):
             print 'user spawned'
-            x, y = building.room.user_space
-            user = spawn_player(x, y, grid_z)
-            OBJECT_CONTAINER.insert(0, user)
-            
-            x, y = building.room.bin_space
-            food = Create(grid_z).food()
-            bucket_storage = Storage(capacity=6, contains=[food], infinity_id='user_house', is_infinity=True)
-            bucket = Object_Place(x, y, grid_z, 'bucket', 'u', storage=bucket_storage)
-            OBJECT_CONTAINER.append(bucket)
+            build_user_house(building.room.user_space, building.room.bin_space, grid_z)
+
             
         # should pass 'structure_value' into the creation property distribution
         structure_value = building.room.value
