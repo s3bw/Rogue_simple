@@ -15,7 +15,7 @@ def build_bar(attribute_name, max, current):
     print '{}: '.format(attribute_name), '|'*number_of_bars + '+'*number_pluses
 
 
-def render_map():
+def render_map(printing_stats):
     current_area = WORLD_CONTAINER[0]
     
     current_area.refresh_grid()
@@ -35,13 +35,10 @@ def render_map():
         print x.equipment.equipped_slot
     
     print 'Depth:', user.active_z, len(WORLD_CONTAINER)
-    print 'Attire: ', [k.name for k in user.creature.attire]    
-    print 'Added Power: ', sum(k.equipment.magnitute for k in user.creature.attire if k.equipment.affect_attribute == 'power')
-    print 'Inventory: ', [k.name for k in user.creature.inventory]    
-    print 'Net Worth: ', sum(k.item.value for k in user.creature.inventory + user.creature.attire)
-    print 'Net Weight: ', sum(k.item.weight for k in user.creature.inventory + user.creature.attire)
     print 'User HP: {}/{}'.format(str(user.creature.hp), str(user.creature.max_hp))
-    print 'User Defence: {}'.format(str(user.creature.defence))
+    if printing_stats == True:
+        user_stats()
+        
     
     for object in OBJECT_CONTAINER:
         if object.creature:
@@ -57,8 +54,10 @@ user = OBJECT_CONTAINER[0]
 
 # key presses
 game_state = True
+printing_stats = False
 while game_state == True:
-    render_map()
+    render_map(printing_stats)
+    printing_stats = False
     
     user_input = raw_input('Where to?')
     if user_input == 'exit':
@@ -66,7 +65,7 @@ while game_state == True:
         break
         
     if user_input == 'stat':
-        object_stats()
+        printing_stats = True
         
     if user_input == '>' or user_input == '<':
         player_travel_z(user, user.active_z)

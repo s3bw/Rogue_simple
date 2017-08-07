@@ -49,12 +49,16 @@ def player_move(user, user_input):
             user.move(dx, dy)        
     else:
         user.move(dx, dy)
-        
-def object_stats():
-    stat_object = check_inventory(OBJECT_CONTAINER)
-    for key, value in  stat_object.__dict__.iteritems():
-        if key == 'equipment':
-            print stat_object.__dict__[key].__dict__
+
+
+def user_stats():
+    user = OBJECT_CONTAINER[0]
+    print 'Attire: ', [k.name for k in user.creature.attire]
+    print 'Inventory: ', [k.name for k in user.creature.inventory]
+    print 'Added Power: ', sum(k.equipment.magnitute for k in user.creature.attire if k.equipment.affect_attribute == 'power')
+    print 'Net Worth: ', sum(k.item.value for k in user.creature.inventory + user.creature.attire)
+    print 'Net Weight: ', sum(k.item.weight for k in user.creature.inventory + user.creature.attire)
+    print 'User Defence: {}'.format(str(user.creature.defence))
         
 def save_infinity_chests():
     for object in OBJECT_CONTAINER:
