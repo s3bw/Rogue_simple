@@ -10,6 +10,8 @@ from user_functions import check_inventory
 
 INFINITY_DATA = './src/infinity_data/'
 
+MAX_DEFENCE = 0.35
+
 class Object_Place:
     def __init__(self, 
             x, y, active_z, name, representation, passable=False,
@@ -78,7 +80,6 @@ class Stairs:
         # '<' up stair, '>' down stair.
         self.go_down = go_down
         
-        
     def use_stairs(self, unit, depth_index):
         depth_index = depth_index + 1 if self.go_down else depth_index - 1
         
@@ -141,6 +142,7 @@ class Storage:
         self.is_infinity = is_infinity
         
         if is_infinity:
+            # Load in items, if this doesnt work, load default items.
             try:
                 infinity_data = shelve.open('{}game_save.txt'.format(INFINITY_DATA))
                 self.contains = infinity_data[self.infinity_id]
@@ -161,8 +163,9 @@ class Storage:
         
         # checking inventory might go into utils, this will need to become number and not string selection
         taking_item = check_inventory(self.contains)
-        self.contains.remove(taking_item)
-        units_inventory.append(taking_item)
+        if taking_item:
+            self.contains.remove(taking_item)
+            units_inventory.append(taking_item)
         
     def store(self, unit):
         units_inventory = unit.creature.inventory
@@ -183,10 +186,11 @@ equip_bonus = lambda entity, attribute: sum(
 )
     
 class Creature:
-    def __init__(self, hp, power, death, inventory=None, attire=None):
+    def __init__(self, hp, power, defence, death, inventory=None, attire=None):
         self.base_hp = hp
         self.hp = hp
         self.base_power = power
+        self.base_defence = defence
         
         self.death = death
         self.inventory = inventory
@@ -207,6 +211,16 @@ class Creature:
         if self.attire:
             return self.base_hp + equip_bonus(self, 'hp')
         return self.base_hp
+        
+    @property
+    def defence(self):
+        """Defence offers a percentage off incoming hit, with a max reduction of 40%."""
+        if self.attire:
+            additional_defence = float(equip_bonus(self, 'defence')/2000.)
+            if additional_defence < MAX_DEFENCE:
+                return self.base_defence + additional_defence
+            return self.base_defence + MAX_DEFENCE
+        return self.base_defence
         
     def take_damage(self, damage):
         if damage > 0:
@@ -232,6 +246,7 @@ class Creature:
             print 'Crit hit'
             damage = (self.power * crit_effect)
             
+        damage = int(damage * (1 - target.creature.defence))
         if damage > 0:
             attacker = self.owner
             print '{} has hit {} with {} worth of damage!'.format(attacker.name, target.name, damage)
@@ -249,6 +264,7 @@ class Creature:
         
             print 'Dropped {}.'.format(most_valued_item.name)
         
+    # THis can probably be done better
     def is_slot_empty(self, check_slots):
         items_in_slots = []
         for item_in_bag in self.attire:
@@ -294,7 +310,7 @@ inscription_bonus = lambda equipt, attribute: sum(
 )
 
 class Equipment:
-    def __init__(self, slots, magnitute, optional_slot=True, equipped_slot=None, 
+    def __init__(self, slots, magnitute, optional_slot=False, equipped_slot=None, 
             affect_attribute=None, 
             inscriptions=None,
             can_inscribe=True
@@ -327,7 +343,6 @@ class Equipment:
         if self.inscriptions:
             return self.base_magnitute * (1 + inscription_bonus(self, 'magnitute'))
         return self.base_magnitute
-        
         
     def toggle_equip(self, unit):
         if self.is_equipped:

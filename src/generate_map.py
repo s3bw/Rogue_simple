@@ -10,7 +10,7 @@ from item_uses import *
 def spawn_player(x, y, z):
     # Starting item should depend on class
     long_sword_item = Item(weight=400, value=60)
-    sword_equip = Equipment(['Main-Hand','Off-Hand'], magnitute=1250, optional_slot=True, equipped_slot='Main-Hand', affect_attribute='power')
+    sword_equip = Equipment(['Main-Hand','Off-Hand'], magnitute=1250, optional_slot=True, equipped_slot=['Main-Hand'], affect_attribute='power')
     sword = Object_Place(None, None, None, 'The Dragonslayer', '/', item=long_sword_item, equipment=sword_equip)
     
     crit_glyph_item = Item(weight=2, value=30, intensity=0.5, has_use=inscribe_glyph, use_verb='inscribe', inscribe_affect='crit')
@@ -20,11 +20,11 @@ def spawn_player(x, y, z):
     power_glyph = Object_Place(None, None, None, 'Power Glyph', '*', item=power_glyph_item)
     
     ring_item = Item(weight=2, value=30)
-    ring_equip = Equipment(['Finger'], magnitute=50, equipped_slot='Finger', affect_attribute='hp')
+    ring_equip = Equipment(['Finger'], magnitute=50, equipped_slot=['Finger'], affect_attribute='hp')
     ring = Object_Place(None, None, None, 'Ring Of Health', 'o', item=ring_item, equipment=ring_equip)
     
     food = Create(z).food()
-    player = Creature(hp=50, power=5, death=creature_death, inventory=[food, crit_glyph, power_glyph], attire=[sword, ring])
+    player = Creature(hp=50, power=5, defence=0.1, death=creature_death, inventory=[food, crit_glyph, power_glyph], attire=[sword, ring])
     user = Object_Place(x, y, z, 'Player Character', '@', creature=player)
     user.creature.hp -= 20
     return user 
@@ -62,7 +62,8 @@ def generate(grid_z, lower=True, start_game=False):
         
     
 
-    
+    make_clothing = Create(7, 6, grid_z).clothing()
+    OBJECT_CONTAINER.append(make_clothing)    
     make_weapon = Create(7, 5, grid_z).weapon()
     OBJECT_CONTAINER.append(make_weapon)
     
@@ -70,7 +71,7 @@ def generate(grid_z, lower=True, start_game=False):
     ring_equip = Equipment(['Finger'], magnitute=78, affect_attribute='power')
     ring = Object_Place(None, None, grid_z, 'Ring Of Power', 'o', item=ring_item, equipment=ring_equip)
     
-    animal_object = Creature(hp=12, power=5, death=creature_death, inventory=[], attire=[ring])
+    animal_object = Creature(hp=12, power=5, defence=0.1, death=creature_death, inventory=[], attire=[ring])
     final_animal = Object_Place(5, 7, grid_z, 'pig', 'p', creature=animal_object)
     OBJECT_CONTAINER.append(final_animal)
 

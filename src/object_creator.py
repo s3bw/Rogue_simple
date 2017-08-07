@@ -4,6 +4,7 @@ from item_uses import *
 import data.materials as mat
 import data.animals as ani
 import data.weapons as weap
+import data.clothings as cloth
 
 
 class Select_Material:
@@ -78,6 +79,7 @@ class Create:
         food = Object_Place(self.x, self.y, self.z, 'Carrot', 'v', item=food_item)
         return food
         
+        
     def tame_animal(self):
         animal_keys = ani.Animal_Data.keys()
         animal = random.choice(animal_keys)
@@ -88,9 +90,10 @@ class Create:
         
         # Create Item to carry (e.g. 'hat', 'food')
 
-        animal_object = Creature(hp=hp, power=power, death=creature_death) #, inventory=[carrot])
+        animal_object = Creature(hp=hp, power=power, defence=0.1, death=creature_death) #, inventory=[carrot])
         final_animal = Object_Place(self.x, self.y, self.z, animal, representation, creature=animal_object)
         return final_animal
+        
         
     def door(self):
         material, attributes = Select_Material(self.rarity_value, material_list=['metal', 'wood']).get()
@@ -101,6 +104,28 @@ class Create:
         door_object = Door(lock_strength=strength, lock_durability=weight)
         final_door = Object_Place(self.x, self.y, self.z, name, '+', door=door_object)
         return final_door
+        
+        
+    def clothing(self):
+        clothing_keys = cloth.Clothing_Data.keys()
+        clothing_name = random.choice(clothing_keys)
+        clothing = cloth.Clothing_Data[clothing_name]
+        
+        material_list = clothing['mat_types']
+        material, attributes = Select_Material(self.rarity_value, material_list=material_list).get()
+        
+        weight = (attributes['weight'] * clothing['size']) / 15
+        value = (attributes['value'] * clothing['size']) + clothing['value']
+        magnitute = attributes['strength']
+        clothing_name = '{} {}'.format(material, clothing_name).capitalize()
+        
+        slots = [clothing['slots']]
+        
+        clothing_item = Item(weight=weight, value=value)
+        clothing_equip = Equipment(slots, magnitute=magnitute, optional_slot=False, affect_attribute='defence')
+        clothing = Object_Place(self.x, self.y, self.z, clothing_name, 'B', item=clothing_item, equipment=clothing_equip)
+        return clothing
+        
         
     def weapon(self):
         weapon_keys = weap.Melee_Weapon_Data.keys()
