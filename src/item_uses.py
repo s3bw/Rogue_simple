@@ -15,13 +15,19 @@ Tense_Dict = {
 def inscribe_glyph(inscription, used_on_creature, verb):
     creatures_items = used_on_creature.inventory + used_on_creature.attire
     inscribing = check_inventory(creatures_items)
+    
     if inscribing.equipment and inscribing.equipment.can_inscribe:
-        print 'The chosen item is:', inscribing.name
-        inscribing.equipment.inscriptions.append(inscription)
-        print inscribing.equipment.inscriptions
+        if len(inscribing.equipment.inscriptions) < inscribing.equipment.max_inscriptions:
+            print 'The chosen item is:', inscribing.name
+            inscribing.equipment.inscriptions.append(inscription)
+            print inscribing.equipment.inscriptions
+            
+        else:
+            print 'No space to inscribe on {}.'.format(inscribing.name)
+            used_on_creature.inventory.append(inscription.owner)
     # This saves item if used incorrectly
     else:
-        print "Can't Inscribe That Item!"
+        print "Item can not be inscribed."
         used_on_creature.inventory.append(inscription.owner)
 
 def healing_item(item_used, used_on_creature, verb):
