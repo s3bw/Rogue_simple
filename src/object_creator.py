@@ -107,6 +107,7 @@ class Create:
         
         
     def clothing(self):
+        # jute has more carry potential
         clothing_keys = cloth.Clothing_Data.keys()
         clothing_name = random.choice(clothing_keys)
         clothing = cloth.Clothing_Data[clothing_name]
@@ -122,7 +123,8 @@ class Create:
         slots = [clothing['slots']]
         
         clothing_item = Item(weight=weight, value=value)
-        clothing_equip = Equipment(slots, magnitute=magnitute, optional_slot=False, affect_attribute='defence')
+        pits = ['hp', 'magnitute']
+        clothing_equip = Equipment(slots, magnitute=magnitute, optional_slot=False, affect_attribute='defence', possible_inscription_types=pits)
         clothing = Object_Place(self.x, self.y, self.z, clothing_name, 'B', item=clothing_item, equipment=clothing_equip)
         return clothing
         
@@ -141,13 +143,23 @@ class Create:
         magnitute = attributes['strength'] * 3
         weapon_name = '{} {}'.format(material,weapon_name).capitalize()
         
+        
         slots = ['Main-Hand', 'Off-Hand']
         optional_slot = True
         if weapon['size_string'] and weapon['size_string'] == 'long':
             optional_slot = False
         
+        pits = ['power', 'magnitute'] # These types effect the outcome of the magnitute of the weapon
         weapon_item = Item(weight=weight, value=value)
-        weapon_equip = Equipment(slots, magnitute=magnitute, optional_slot=optional_slot, affect_attribute='power')
+        weapon_equip = Equipment(slots, magnitute=magnitute, optional_slot=optional_slot, affect_attribute='power', possible_inscription_types=pits)
+        
+        if material == 'white brass':
+            # White Brass comes with a ability to Crit
+            weapon_item = Item(weight=weight, value=value+30)            
+            crit_glyph_item = Item(weight=2, value=30, intensity=0.30, has_use=inscribe_glyph, use_verb='inscribe', inscribe_affect='crit')
+            crit_glyph = Object_Place(None, None, None, 'Glyph of Vital Aiming', '*', item=crit_glyph_item)
+            weapon_equip = Equipment(slots, magnitute=magnitute, optional_slot=optional_slot, affect_attribute='power', inscriptions=[crit_glyph] possible_inscription_types=pits)
+            
         weapon = Object_Place(self.x, self.y, self.z, weapon_name, '/', item=weapon_item, equipment=weapon_equip)
         return weapon
 

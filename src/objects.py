@@ -67,7 +67,7 @@ class Object_Place:
             
     def send_to_back(self):
         OBJECT_CONTAINER.remove(self)
-        OBJECT_CONTAINER.insert(0, self)
+        OBJECT_CONTAINER.insert(1, self)
             
     def move(self, dx, dy):
         if not self.grid_level.is_blocked(self.x + dx, self.y + dy):
@@ -206,6 +206,8 @@ class Creature:
             return self.base_power + equip_bonus(self, 'power')
         return self.base_power
             
+    #Creatures Carry Potential Property is going to have to iterate through the equiped attire inscriptions
+            
     @property
     def max_hp(self):
         if self.attire:
@@ -238,8 +240,8 @@ class Creature:
         # figure out how we will use inscription in doing crit
         # Targeting should effect crit chance and amount
         # Crit-splotion
-        crit_effect = 2
-        crit_chance = 20
+        crit_effect =  1 + sum(inscription_bonus(x.equipment, ['crit']) for x in self.attire)
+        crit_chance = 100
         check_crit = random.randint(0,100)
         damage = self.power
         if check_crit < crit_chance:
@@ -303,31 +305,39 @@ class Item:
             self.has_use(self, use_on.creature, self.use_verb)
 
 
-inscription_bonus = lambda equipt, attribute: sum(
+inscription_bonus = lambda equipt, white_list: sum(
     script.intensity 
     for script in equipt.inscriptions 
-    if script.inscribe_affect == attribute
+    if script.inscribe_affect in white_list #equipt.inscriptions and 
 )
 
 class Equipment:
     def __init__(self, slots, magnitute, optional_slot=False, equipped_slot=None, 
-            affect_attribute=None, 
+            affect_attribute=None,
+            
             inscriptions=None,
+            possible_inscription_types=None,
+            max_inscriptions=2,
             can_inscribe=True
         ):
-        # Slot Handling
+        # Slot Handling:
         self.slots = slots
         self.optional_slot = optional_slot
         self.equipped_slot = equipped_slot
         self.is_equipped = False
         
-        # Affect Handling
+        # Affect Handling:
         self.base_magnitute = magnitute
-        #self.base_magnitute = magnitute
         self.affect_attribute = affect_attribute
+        
+        # Inscripton Handling:
         self.inscriptions = inscriptions
+        self.possible_inscription_types = possible_inscription_types
+        self.max_inscriptions = max_inscriptions
         if inscriptions is None:
             self.inscriptions = []
+        if possible_inscription_types is None:
+            self.possible_inscription_types =[]
         self.can_inscribe = can_inscribe
 
         all_attire = [
@@ -335,13 +345,14 @@ class Equipment:
             for entity in OBJECT_CONTAINER
             if entity.creature
         ]
+        
         if self not in OBJECT_CONTAINER and (self in all_attire):
             self.is_equipped = True
             
     @property
     def magnitute(self):
         if self.inscriptions:
-            return self.base_magnitute * (1 + inscription_bonus(self, 'magnitute'))
+            return self.base_magnitute * (1 + inscription_bonus(self, self.possible_inscription_types))
         return self.base_magnitute
         
     def toggle_equip(self, unit):

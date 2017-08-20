@@ -9,7 +9,7 @@ from item_uses import *
 
 
 def spawn_player(x, y, z):
-    # species is random atm.
+    # species is random atm. (This is the player selected CLASS)
     species_keys = Species_Options.keys()
     species_name = random.choice(species_keys)
     species = Species_Options[species_name]
@@ -20,21 +20,28 @@ def spawn_player(x, y, z):
     
     # Starting item should depend on class
     long_sword_item = Item(weight=400, value=60)
-    sword_equip = Equipment(['Main-Hand','Off-Hand'], magnitute=1250, optional_slot=True, equipped_slot=['Main-Hand'], affect_attribute='power')
+    pits = ['power', 'magnitute']
+    sword_equip = Equipment(['Main-Hand','Off-Hand'], magnitute=1250, optional_slot=True, equipped_slot=['Main-Hand'], affect_attribute='power', possible_inscription_types=pits)
     sword = Object_Place(None, None, None, 'The Dragonslayer', '/', item=long_sword_item, equipment=sword_equip)
     
-    crit_glyph_item = Item(weight=2, value=30, intensity=0.5, has_use=inscribe_glyph, use_verb='inscribe', inscribe_affect='crit')
-    crit_glyph = Object_Place(None, None, None, 'Crit Glyph', '*', item=crit_glyph_item)
+    crit_glyph_item = Item(weight=2, value=30, intensity=0.02, has_use=inscribe_glyph, use_verb='inscribe', inscribe_affect='crit')
+    crit_glyph = Object_Place(None, None, None, 'Glyph of Vital Aiming', '*', item=crit_glyph_item)
     
-    power_glyph_item = Item(weight=2, value=30, intensity=0.5, has_use=inscribe_glyph, use_verb='inscribe', inscribe_affect='magnitute')
+    power_glyph_item = Item(weight=2, value=30, intensity=0.5, has_use=inscribe_glyph, use_verb='inscribe', inscribe_affect='power')
     power_glyph = Object_Place(None, None, None, 'Power Glyph', '*', item=power_glyph_item)
+
     
     ring_item = Item(weight=2, value=30)
-    ring_equip = Equipment(['Finger'], magnitute=50, equipped_slot=['Finger'], affect_attribute='hp')
+    pits = ['hp', 'magnitute']
+    ring_equip = Equipment(['Finger'], magnitute=50, equipped_slot=['Finger'], affect_attribute='hp', possible_inscription_types=pits)
     ring = Object_Place(None, None, None, 'Ring Of Health', 'o', item=ring_item, equipment=ring_equip)
     
+    hp_glyph_item = Item(weight=2, value=30, intensity=0.5, has_use=inscribe_glyph, use_verb='inscribe', inscribe_affect='hp')
+    hp_glyph = Object_Place(None, None, None, 'HP Glyph', '*', item=hp_glyph_item)
+
+    
     food = Create(z).food()
-    player = Creature(hp=50, power=5, defence=defence, death=creature_death, inventory=[food, crit_glyph, power_glyph], attire=[sword, ring])
+    player = Creature(hp=50, power=5, defence=defence, death=creature_death, inventory=[food, crit_glyph, power_glyph, hp_glyph], attire=[sword, ring])
     user = Object_Place(x, y, z, species_name, representation, creature=player)
     user.creature.hp -= 20
     return user 
