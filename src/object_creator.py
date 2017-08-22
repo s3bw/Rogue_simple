@@ -158,7 +158,7 @@ class Create:
             weapon_item = Item(weight=weight, value=value+30)            
             crit_glyph_item = Item(weight=2, value=30, intensity=0.30, has_use=inscribe_glyph, use_verb='inscribe', inscribe_affect='crit')
             crit_glyph = Object_Place(None, None, None, 'Glyph of Vital Aiming', '*', item=crit_glyph_item)
-            weapon_equip = Equipment(slots, magnitute=magnitute, optional_slot=optional_slot, affect_attribute='power', inscriptions=[crit_glyph] possible_inscription_types=pits)
+            weapon_equip = Equipment(slots, magnitute=magnitute, optional_slot=optional_slot, affect_attribute='power', inscriptions=[crit_glyph], possible_inscription_types=pits)
             
         weapon = Object_Place(self.x, self.y, self.z, weapon_name, '/', item=weapon_item, equipment=weapon_equip)
         return weapon

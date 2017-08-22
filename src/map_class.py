@@ -5,13 +5,36 @@ from containers import *
 DEFAULT_GRID_X = 20
 DEFAULT_GRID_Y = 20
 MAX_ATTEMPTS = 20
-MAX_SIZE_ROOM = 6
-MIN_SIZE_ROOM = 3
+MAX_SIZE_ROOM = 6 # wall external max 7, internal max 5
+MIN_SIZE_ROOM = 3 # wall external min 4, internal min 2
+# Rooms with internal structures:
+#   5x5, 5x4
 ROOM_AREA = MAX_SIZE_ROOM * MAX_SIZE_ROOM
 WALKING_AREA = 0.70
 
+
 def room_length():
     return random.randint(MIN_SIZE_ROOM, MAX_SIZE_ROOM)
+    
+    
+def trim_list(the_list, value):
+    """ Given an ordered range and a number in that range.
+    Split the list in two at the index of that value and return the larger of the resulting lists.
+    
+    :param the_list: (list) of a range to be split into two lists. (e.g [ 2, 3, 4, 5])
+    :param value: (int) the value to split the list at. (e.g. 3)
+    :return: The large side after split. (e.g. [4, 5])
+    """
+    index = the_list.index(value)
+    left_side = the_list[:index]
+    right_side = the_list[index+1:]    
+    if len(left_side) == len(right_side):
+        return left_side[1:] + right_side[:-1]
+        
+    elif len(left_side) > len(right_side):
+        return left_side[1:]
+    return right_side[:-1]
+    
 
 class Rect:
     def __init__(self, x, y, h, v, room=None):
@@ -74,27 +97,65 @@ class Rect:
 
         
 class Room:
-    def __init__(self, grid, value=0, room_objects=None, doors=None):
+    def __init__(self, grid, value=0, room_objects=None, doors=None, internal_structure=None):
         self.value = value
         self.doors = doors
         self.room_objects = room_objects
+        self.internal_structure = internal_structure
         
         #Instead of h and v we need x and y - h and v is probably ok, double check consistency
         grid_h = range(grid.grid_h)
         grid_v = range(grid.grid_v)
         self.grid_space = [ (x, y) for x in grid_h for y in grid_v]
         
-        if value > 50:
+        if value > 20:
             self.doors = 1
             self.room_objects = 1
             
-    def space_allocation(self):
-        self.door_places()
-        self.object_places()
-        
     def allocate_spaces(self, space, number_to_select):
         """Out of a list of co-ordinates this function chooses (int) 'number_to_select' co-ordinates."""
         return random.sample(space, number_to_select)
+        
+    def internal_walls(self):
+#   # # # # #   # # # # #   #      #
+#   # . . . #   # . # . #     . . .
+#   # # . # #   # . # . #     . . .
+#   + . . . #   # . . . #     . . . 
+#   # . . . #   + . # . #     . . .
+#   # # # # #   # # # # #   #      #
+        h = self.owner.x2 - self.owner.x1 - 1
+        v = self.owner.y2 - self.owner.y1 - 1
+        
+        area = h * v
+        door_space = self.door_space        
+        if area > 15 and len(door_space) == 1:
+            # Plot interior area
+            ix1 = self.owner.x1 + 1
+            ix2 = self.owner.x2 - 1
+            iy1 = self.owner.y1 + 1
+            iy2 = self.owner.y2 - 1
+
+            ih = range(ix1, ix2 + 1)
+            iv = range(iy1, iy2 + 1)
+            
+            print ih, iv            
+            door_x, door_y = door_space[0]            
+            if door_x in ih:
+                ih = trim_list(ih, door_x)
+                iv = iv[1:-1]
+            else:
+                iv = trim_list(iv, door_y)
+                ih = ih[1:-1]
+                
+            if bool(random.getrandbits(1)):
+                ih = random.choice(ih)
+                internal_structure = [(ih, y) for y in range(iy1, iy2+1)]
+            else:
+                iv = random.choice(iv)
+                internal_structure = [(x, iv) for x in range(ix1, ix2+1)]
+            
+            self.internal_structure = internal_structure
+            self.internal_structure.remove(random.choice(internal_structure))
         
     def door_places(self):        
         door_space = [(x, y) for (x, y) in self.grid_space if self.owner.sides(x, y)]
@@ -105,6 +166,11 @@ class Room:
         object_space = self.clear_doorway(object_space)
         self.object_space = self.allocate_spaces(object_space, self.room_objects)
         del self.grid_space
+        
+    def space_allocation(self):
+        self.door_places()
+        self.internal_walls()
+        self.object_places()
         
     def clear_doorway(self, internal_space):
         offsets = [(0,1),(0,-1),(1,0),(-1,0)]
@@ -185,7 +251,8 @@ class Grid:
         calculate_space =  (self.grid_area*(1- WALKING_AREA)) / ROOM_AREA
         
         self.rooms = []
-        space_for_rooms = calculate_space
+        # space_for_rooms = calculate_space
+        space_for_rooms = 2
         while space_for_rooms > 1:
             new_room = self.create_room(self.rooms)
             
@@ -213,6 +280,8 @@ class Grid:
             max_x = grid_max_x(new_h)
             max_y = grid_max_y(new_v)
             new_value = random.randint(0,100)
+            
+            # Remeber the index starts at Zero: [0, 1, 2]
             new_x = random.randint(1, max_x-1)
             new_y = random.randint(1, max_y-1)
             
@@ -235,9 +304,17 @@ class Grid:
     def place_walls(self):
         for y in range(self.grid_h):
             for x in range(self.grid_v):
-                if any(map_object.edges(x,y) and (x,y) not in map_object.room.door_space for map_object in self.rooms):
-                    self.grid[x][y].make_wall()
-                    self.grid[x][y].blocked = True
+                for map_object in self.rooms:
+                
+                    # Room with internal Walls
+                    if map_object.room.internal_structure and (x, y) in map_object.room.internal_structure:
+                        self.grid[x][y].make_wall()
+                        self.grid[x][y].blocked = True
+                        
+                    # Room without internal walls
+                    elif map_object.edges(x,y) and (x,y) not in map_object.room.door_space:
+                        self.grid[x][y].make_wall()
+                        self.grid[x][y].blocked = True
                     
         # Include types of maps gen - above ground/below
         
