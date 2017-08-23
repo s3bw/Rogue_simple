@@ -12,12 +12,15 @@ MIN_SIZE_ROOM = 3 # wall external min 4, internal min 2
 ROOM_AREA = MAX_SIZE_ROOM * MAX_SIZE_ROOM
 WALKING_AREA = 0.70
 
+OFFSETS = [(0, 1),(0, -1),(1, 0),(-1, 0)]
+DIAGONAL_OFFSETS = [(-1, -1),(1, -1),(1, 1),(-1, 1)]
+
 
 def room_length():
     return random.randint(MIN_SIZE_ROOM, MAX_SIZE_ROOM)
     
     
-def trim_list(the_list, value):
+def trim_list(the_list, value, other_list):
     """ Given an ordered range and a number in that range.
     Split the list in two at the index of that value and return the larger of the resulting lists.
     
@@ -26,14 +29,17 @@ def trim_list(the_list, value):
     :return: The large side after split. (e.g. [4, 5])
     """
     index = the_list.index(value)
+    
+    other_list = other_list[1:-1]
+    
     left_side = the_list[:index]
     right_side = the_list[index+1:]    
     if len(left_side) == len(right_side):
-        return left_side[1:] + right_side[:-1]
+        return left_side[1:] + right_side[:-1], other_list
         
     elif len(left_side) > len(right_side):
-        return left_side[1:]
-    return right_side[:-1]
+        return left_side[1:], other_list
+    return right_side[:-1], other_list
     
 
 class Rect:
@@ -97,10 +103,11 @@ class Rect:
 
         
 class Room:
-    def __init__(self, grid, value=0, room_objects=None, doors=None, internal_structure=None):
+    def __init__(self, grid, value=0, room_objects=None, doors=None, immovable_objects=None, internal_structure=None):
         self.value = value
         self.doors = doors
         self.room_objects = room_objects
+        self.immovable_objects = immovable_objects
         self.internal_structure = internal_structure
         
         #Instead of h and v we need x and y - h and v is probably ok, double check consistency
@@ -116,13 +123,11 @@ class Room:
         """Out of a list of co-ordinates this function chooses (int) 'number_to_select' co-ordinates."""
         return random.sample(space, number_to_select)
         
-    def internal_walls(self):
-#   # # # # #   # # # # #   #      #
-#   # . . . #   # . # . #     . . .
-#   # # . # #   # . # . #     . . .
-#   + . . . #   # . . . #     . . . 
-#   # . . . #   + . # . #     . . .
-#   # # # # #   # # # # #   #      #
+    def door_places(self):        
+        door_space = [(x, y) for (x, y) in self.grid_space if self.owner.sides(x, y)]
+        self.door_space = self.allocate_spaces(door_space, self.doors)
+        
+    def internal_places(self):
         h = self.owner.x2 - self.owner.x1 - 1
         v = self.owner.y2 - self.owner.y1 - 1
         
@@ -131,61 +136,89 @@ class Room:
         if area > 15 and len(door_space) == 1:
             # Plot interior area
             ix1 = self.owner.x1 + 1
-            ix2 = self.owner.x2 - 1
+            ix2 = self.owner.x2 
             iy1 = self.owner.y1 + 1
-            iy2 = self.owner.y2 - 1
+            iy2 = self.owner.y2
 
-            ih = range(ix1, ix2 + 1)
-            iv = range(iy1, iy2 + 1)
+            ih = range(ix1, ix2)
+            iv = range(iy1, iy2)
             
-            print ih, iv            
-            door_x, door_y = door_space[0]            
+            # Remove structures away from door and sides
+            door_x, door_y = door_space[0]
             if door_x in ih:
-                ih = trim_list(ih, door_x)
-                iv = iv[1:-1]
+                ih, iv = trim_list(ih, door_x, iv)
             else:
-                iv = trim_list(iv, door_y)
-                ih = ih[1:-1]
+                iv, ih = trim_list(iv, door_y, ih)
                 
-            if bool(random.getrandbits(1)):
+            # Choose structure direction, then make a passable gap
+            verticle_line = bool(random.getrandbits(1))
+            if verticle_line:
                 ih = random.choice(ih)
                 internal_structure = [(ih, y) for y in range(iy1, iy2+1)]
             else:
                 iv = random.choice(iv)
                 internal_structure = [(x, iv) for x in range(ix1, ix2+1)]
             
+            internal_structure.remove(random.choice(internal_structure))
             self.internal_structure = internal_structure
-            self.internal_structure.remove(random.choice(internal_structure))
+
+    def clear_doorway(self, internal_space):
+        main_door_x, main_door_y = self.door_space[0]
         
-    def door_places(self):        
-        door_space = [(x, y) for (x, y) in self.grid_space if self.owner.sides(x, y)]
-        self.door_space = self.allocate_spaces(door_space, self.doors)
+        door_way = [(main_door_x + dx, main_door_y + dy) for dx, dy in OFFSETS]
+        internal_space = [(x, y) for x, y in internal_space if (x, y) not in door_way]
+        return internal_space
+        
+    def immovable_places(self):
+        """ This should consist of the corners, with the exception of some cases"""
+        top_left = (self.owner.x1 + 1, self.owner.y1 + 1)
+        top_right = (self.owner.x2 - 1, self.owner.y1 + 1)
+        bottom_left = (self.owner.x1 + 1, self.owner.y2 - 1)
+        bottom_right = (self.owner.x2 - 1, self.owner.y2 - 1)
+        immovable_places = [top_left, top_right, bottom_left, bottom_right]
+        immovable_places = self.clear_doorway(immovable_places)
+        
+        select_immovable_places = []
+        for corner_x, corner_y in immovable_places:
+            corner = (corner_x, corner_y)
+        
+            adjacent = [(corner_x + dx, corner_y + dy) for (dx, dy) in OFFSETS]
+            diagonal_adjacent = [(corner_x + dx, corner_y + dy) for (dx, dy) in DIAGONAL_OFFSETS]
+            
+            if self.internal_structure is not None:
+                adjacent = [place for place in adjacent if place in self.internal_structure]
+                diagonal_adjacent = [place for place in diagonal_adjacent if place in self.internal_structure]
+                
+                if len(diagonal_adjacent) == 1 and len(adjacent) != len(diagonal_adjacent):
+                    continue
+                else:
+                    select_immovable_places.append(corner)
+            else:
+                select_immovable_places.append(corner)
+        
+        self.immovable_space = self.allocate_spaces(select_immovable_places, self.immovable_objects)
         
     def object_places(self):
         object_space = [(x, y) for (x, y) in self.grid_space if self.owner.internal(x, y) and (x, y) != self.owner.center()]
+        if self.internal_structure is not None:
+            object_space = [(x, y) for (x, y) in object_space if (x, y) not in self.internal_structure]
+        
         object_space = self.clear_doorway(object_space)
         self.object_space = self.allocate_spaces(object_space, self.room_objects)
         del self.grid_space
         
     def space_allocation(self):
         self.door_places()
-        self.internal_walls()
+        self.internal_places()
+        self.immovable_places()
         self.object_places()
-        
-    def clear_doorway(self, internal_space):
-        offsets = [(0,1),(0,-1),(1,0),(-1,0)]
-        main_door_x, main_door_y = self.door_space[0]
-        
-        door_way = [(main_door_x + dx, main_door_y + dy) for dx, dy in offsets]
-        internal_space = [(x, y) for x, y in internal_space if (x,y) not in door_way]
-        return internal_space
         
     def users_start(self):
         self.user_space = self.owner.center()
         print self.door_space[0]
         self.door_space = self.door_space[:1]
         #place bin on far side
-        self.bin_space = self.object_space[0]
+        self.bin_space = self.immovable_space[0]
         self.object_space = []
 
         
@@ -285,7 +318,7 @@ class Grid:
             new_x = random.randint(1, max_x-1)
             new_y = random.randint(1, max_y-1)
             
-            room_component = Room(grid=self, value=new_value, doors=2, room_objects=2)
+            room_component = Room(grid=self, value=new_value, doors=2, immovable_objects=1, room_objects=2)
             map_object = Rect(new_x, new_y, new_h, new_v, room=room_component)
             
             if self.building_restriction:
