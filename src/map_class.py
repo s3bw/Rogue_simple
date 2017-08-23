@@ -163,10 +163,15 @@ class Room:
             self.internal_structure = internal_structure
 
     def clear_doorway(self, internal_space):
-        main_door_x, main_door_y = self.door_space[0]
+        """ Remove all doorways from object space.
         
-        door_way = [(main_door_x + dx, main_door_y + dy) for dx, dy in OFFSETS]
-        internal_space = [(x, y) for x, y in internal_space if (x, y) not in door_way]
+        :param internal_space: (list) containing co-ordinates of all internal points.
+        :return: The 'internal_space' without doorways.
+        """
+        for main_door_x, main_door_y in self.door_space:
+            door_way = [(main_door_x + dx, main_door_y + dy) for dx, dy in OFFSETS]
+            internal_space = [(x, y) for x, y in internal_space if (x, y) not in door_way]
+            
         return internal_space
         
     def immovable_places(self):
@@ -205,19 +210,17 @@ class Room:
         
         object_space = self.clear_doorway(object_space)
         self.object_space = self.allocate_spaces(object_space, self.room_objects)
-        del self.grid_space
         
     def space_allocation(self):
         self.door_places()
         self.internal_places()
         self.immovable_places()
         self.object_places()
+        del self.grid_space
         
     def users_start(self):
-        self.user_space = self.owner.center()
-        print self.door_space[0]
+        self.user_space = self.object_space[0]
         self.door_space = self.door_space[:1]
-        #place bin on far side
         self.bin_space = self.immovable_space[0]
         self.object_space = []
 
@@ -248,7 +251,7 @@ class Grid:
         self.first_grid = first_grid
         self.building_restriction = building_restriction
         self.create_grid()
-        
+        # Above ground grid needs an external space attribute
             
         # Space allocation
         # --> Some kinda random_noise to make random outside objects,
@@ -284,8 +287,7 @@ class Grid:
         calculate_space =  (self.grid_area*(1- WALKING_AREA)) / ROOM_AREA
         
         self.rooms = []
-        # space_for_rooms = calculate_space
-        space_for_rooms = 2
+        space_for_rooms = calculate_space
         while space_for_rooms > 1:
             new_room = self.create_room(self.rooms)
             
@@ -307,7 +309,7 @@ class Grid:
         
         attempts = 0
         valid_room = False
-        while valid_room == False and MAX_ATTEMPTS >= attempts:
+        while not valid_room and MAX_ATTEMPTS >= attempts:
             new_h = room_length()
             new_v = room_length()
             max_x = grid_max_x(new_h)
