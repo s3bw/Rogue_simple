@@ -63,12 +63,12 @@ def build_user_house(user_space, bin_space, z):
 def generate(grid_z, lower=True, start_game=False):
     # GRID defines the grid size, generate with define the biome, 
     # Thus: this is where we change the grid size and we wont pass it into generate.
-    restricted_places = None
+    entry_point = None
     if not start_game:
-        restricted_places = [(object.x, object.y) for object in OBJECT_CONTAINER]
-        [(entrance_x, entrance_y)] = restricted_places
+        entry_point = [(object.x, object.y) for object in OBJECT_CONTAINER]
+        [(entrance_x, entrance_y)] = entry_point
         
-    map_area = Grid(grid_biome='village', first_grid=start_game, building_restriction=restricted_places)
+    map_area = Grid(grid_biome='village', first_grid=start_game, entry_point=entry_point)
     WORLD_CONTAINER.append(map_area)
     
     
@@ -108,21 +108,21 @@ def generate(grid_z, lower=True, start_game=False):
         #Place the player in the user_space
         
     # Place Objects in spaces
-    for building in map_area.rooms:
-        if hasattr(building.room, 'user_space'):
+    for structure in map_area.structures:
+        if hasattr(structure.building, 'user_space'):
             print 'user spawned'
-            build_user_house(building.room.user_space, building.room.bin_space, grid_z)
+            build_user_house(structure.building.user_space, structure.building.bin_space, grid_z)
 
             
         # should pass 'structure_value' into the creation property distribution
-        structure_value = building.room.value
-        for (x, y) in building.room.door_space:
+        structure_value = structure.building.value
+        for (x, y) in structure.building.door_space:
             # need unlocked doors on shop and low value houses
             place = Create(x, y, grid_z, structure_value)
             door = place.door()
             OBJECT_CONTAINER.append(door)
             
-        for (x, y) in building.room.object_space:
+        for (x, y) in structure.building.object_space:
             place = Create(x, y, grid_z, structure_value)
             animal = place.tame_animal()
             # if structure_value > 80:

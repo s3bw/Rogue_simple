@@ -43,13 +43,17 @@ def trim_list(the_list, value, other_list):
     
 
 class Rect:
-    def __init__(self, x, y, h, v, room=None):
-        self.x1 = x
-        self.y1 = y
-        self.x2 = x + h
-        self.y2 = y + v
-        
-        #Look into compartmentalising large rooms
+    """ A Rectanglular polygon.
+    
+    :attributes:
+        x1:     the most-left x co-ord
+        y1:     the most-high y co-ord
+        x2:     the most-right x co-ord
+        y2:     the most-low y co-ord
+        area:   area encompassed by 'x1, x2, y1, y2'
+        room:   the room component of the Rect
+    """
+    def __init__(self, building=None):
         #Look into slightly roundifying rooms on length of edges
         #   -------          --------
         #   |     |          |      |
@@ -59,12 +63,45 @@ class Rect:
         #   |     |  -->    \        /
         #   |     |          |      |
         #   -------          --------
-        self.area = h * v
-                
-        self.room = room
+        h = self.rectangle_length()
+        limit_grid_x = lambda length: DEFAULT_GRID_X - length - 1
+        max_x = limit_grid_x(h)
         
-        if self.room:
-            self.room.owner = self
+        v = self.rectangle_length()
+        limit_grid_y = lambda length: DEFAULT_GRID_Y - length - 1
+        max_y = limit_grid_y(v)    
+    
+        # Remeber the index starts at Zero: [0, 1, 2]
+        x = random.randint(1, max_x-1)
+        y = random.randint(1, max_y-1)
+    
+        self.x1 = x
+        self.y1 = y
+        self.x2 = x + h
+        self.y2 = y + v
+        self.area = h * v
+
+        self.building = building
+        
+        if self.building:
+            self.building.owner = self
+            
+    def rectangle_length(self):
+            """ Define the length of a rectangle side."""
+            return random.randint(MIN_SIZE_ROOM, MAX_SIZE_ROOM)
+        
+    def build_element(self, new_value):
+        doors = 2
+        building_objects = 2
+        if new_value > 20:
+            doors = 1
+            building_objects = 1
+            
+        #self.room.owner = self
+        self.building = Building(value=new_value, doors=doors, immovable_objects=1, building_objects=building_objects)
+        self.building.owner = self
+        print 'Space Allocating'
+        self.building.space_allocation()
         
     def center(self):
         center_x = (self.x1 + self.x2) / 2
@@ -102,23 +139,35 @@ class Rect:
             or (self.y2 == y and self.x1 < x < self.x2)
 
         
-class Room:
-    def __init__(self, grid, value=0, room_objects=None, doors=None, immovable_objects=None, internal_structure=None):
+class Building:
+    """ A Building object that encompasses all the features of this map structure
+    
+    :attributes:
+        value
+        doors
+        building_objects
+        immovable_objects
+        internal_structure
+        grid_space
+        door_space
+        internal_structure
+        immovable_space
+        object_space
+        bin_space
+    """
+    
+    def __init__(self, value=50, building_objects=None, doors=None, immovable_objects=None, internal_structure=None):
         self.value = value
         self.doors = doors
-        self.room_objects = room_objects
+        self.building_objects = building_objects
         self.immovable_objects = immovable_objects
         self.internal_structure = internal_structure
         
         #Instead of h and v we need x and y - h and v is probably ok, double check consistency
-        grid_h = range(grid.grid_h)
-        grid_v = range(grid.grid_v)
+        grid_h = range(DEFAULT_GRID_X)
+        grid_v = range(DEFAULT_GRID_Y)
         self.grid_space = [(x, y) for x in grid_h for y in grid_v]
-        
-        if value > 20:
-            self.doors = 1
-            self.room_objects = 1
-            
+
     def allocate_spaces(self, space, number_to_select):
         """Out of a list of co-ordinates this function chooses (int) 'number_to_select' co-ordinates."""
         if len(space) < number_to_select:
@@ -213,7 +262,7 @@ class Room:
             object_space = [(x, y) for (x, y) in object_space if (x, y) not in self.internal_structure]
         
         object_space = self.clear_doorway(object_space)
-        self.object_space = self.allocate_spaces(object_space, self.room_objects)
+        self.object_space = self.allocate_spaces(object_space, self.building_objects)
         
     def space_allocation(self):
         self.door_places()
@@ -260,7 +309,8 @@ class Grid:
         grid_h                  (int) the height of the grid
         grid_v                  (int) the verticle of the grid
         grid_z                  (int) the z/depth level of the grid
-        grid_value              (int) the value of the grid defines what things can spawn
+        large_structures
+        medium_structures
         biome                   (string) the type of grid to be generated
         first_grid              (bool) identifying the first grid generated #CHANGES - make int first - this can be the z level
         entry_point             (list) of tuple, containing co-ords of places that cant be built upon
@@ -275,15 +325,12 @@ class Grid:
         self.grid_v = grid_v
         self.grid_z = grid_z
         
-        self.grid_value = random.randint(0,100)
         self.biome = grid_biome
         self.first_grid = first_grid
         self.entry_point = entry_point
         self.create_grid()
         """
         Separate the map obejcts from the map
-            Create the variable 'map_objects' to contain all objects and types.
-            
             On creating the map append and search this space for possible locations.
             
             Build objects in free space by passing the grid into the objects (like 'house') structure or 'tree' structure
@@ -291,20 +338,12 @@ class Grid:
             House object should decide on the object type - depending on the space it receives
             
             have attempts to pick a space and a size. 
-            
-            gen with params 'small' 'med' and 'large'
-        
-        
         """
         
         # Above ground grid needs an external space attribute
-            
         # Space allocation
-        # --> Some kinda random_noise to make random outside objects,
-        # --> Invert the room to make caverns
-        # --> Tunnel space
-        # --> Think about slightly differing tile colours
-            
+
+        
             
     def create_grid(self):
         self.grid = [[
@@ -312,15 +351,104 @@ class Grid:
             for x in range(self.grid_h)]
                 for y in range(self.grid_v)
             ]
-        # Instead:
-        # allocate_structures()
-        # place_structural_elements()
-        # make_exit_point()
+
+        self.determine_structure_sizes()
         self.allocate_structures()
-        self.place_walls()
-        self.allocate_exit()
+        self.build_structural_elements()
+        self.place_structures()
+        self.make_exit_point()
         
-    def allocate_exit(self):
+        
+    def determine_structure_sizes(self):
+        """ This function determines count of structures to be created inside the grid
+        
+        :attribute large_structures: (int) allocated large structures for the grid.
+        :attribute medium_structures: (int) allocated medium structures for the grid.
+        """
+        self.large_structures = 0
+        self.medium_structures = 4
+    
+        grid_value = random.randint(0,100)
+        if grid_value > 80 and not self.first_grid:
+            self.large_structures = 1
+            self.medium_structures = 1
+            
+        
+    def allocate_structures(self):
+        # Split grid_structures to make the placement before doing the internal gen.
+        #   --> eg find a space on the map for all the objects
+        #   --> make the objects more complex using allocated space
+        ###self.biome_structures = BIOME_DATA[self.biome]
+        
+        self.structures = []
+        
+        completed_large_structures = 0
+        while completed_large_structures < self.large_structures:
+            new_structure = self.validate_structure('building', self.structures)
+
+            if new_structure == False:
+                self.structures = []
+                completed_large_structures = 0
+                print 'Map Rejected'
+            
+            else:
+                completed_large_structures += 1
+                self.structures.append(new_structure)
+                
+        completed_medium_structures = 0
+        while completed_medium_structures < self.medium_structures:
+            new_structure = self.validate_structure('building', self.structures)
+
+            if new_structure == False:
+                self.structures = []
+                completed_medium_structures = 0
+                print 'Map Rejected'
+            
+            else:
+                completed_medium_structures += 1
+                self.structures.append(new_structure)
+                
+        print self.structures
+
+            
+    def validate_structure(self, structure_type, structures):
+        # Attempt to make a room in a spot allocating its size first,
+        # This function can be 'place_structural_center(self, structure_type)'
+        # If this fails move spot and try again
+        # if this coninues to fail scrap the map and start again
+
+        attempts = 0
+        valid_structure = False
+        while not valid_structure and MAX_ATTEMPTS >= attempts:
+            if structure_type == 'building':
+                map_object = Rect()
+
+            # Define the valid structure
+            if self.entry_point:
+                # needs to be GENERAL, not all contain rectangle
+                valid_structure = (not any(created_structure.intersect(map_object, steps_away=1) for created_structure in structures)) \
+                    and all(not map_object.rectangle(x, y) for x, y in self.entry_point)
+            else:
+                valid_structure = not any(created_structure.intersect(map_object, steps_away=1) for created_structure in structures)
+            attempts += 1
+            
+        if valid_structure:
+            return map_object
+            
+        return False
+        
+
+    def build_structural_elements(self):
+        new_value = random.randint(0,100)
+        
+        for map_object in self.structures:
+            map_object.build_element(new_value)
+                
+        if self.first_grid:
+            self.structures[0].building.users_start()
+            
+            
+    def make_exit_point(self):
         possible_space = []
         for y in range(self.grid_h):
             for x in range(self.grid_v):
@@ -331,101 +459,20 @@ class Grid:
         
         self.exit_point = possible_space[selected_index]
 
-    def place_stuctural_elements(self):
-        for map_object in self.structures:
-            map_object.room.space_allocation()
 
-    def allocate_structures(self):
-        # Split grid_structures to make the placement before doing the internal gen.
-        #   --> eg find a space on the map for all the objects
-        #   --> make the objects more complex using allocated space
-        self.biome_structures = BIOME_DATA[self.biome]
-        
-        grid_area = self.grid_h * self.grid_v
-        calculate_space =  (grid_area*(1- WALKING_AREA)) / ROOM_AREA
-        
-        self.structures = []
-        available_area = calculate_space
-        print available_area
-        while available_area > 1:
-            # Larger structures are rare
-            #if self.grid_value > 80:
-            new_structure = self.create_structure('river', self.structures)
-                
-            
-        
-            #new_structure = self.create_room(self.structures)
-            
-            if new_structure == False:
-                self.structures = []
-                available_area = calculate_space
-                print 'Map Rejected'
-            
-            else:
-                available_area -= new_structure.size
-                self.structures.append(new_structure)
-                
-        if self.first_grid:
-            # this wont work if the first structure is not a room
-            self.structures[0].room.users_start()
-            
-    def create_room(self, rooms):
-        # Attempt to make a room in a spot allocating its size first,
-        # This function can be 'place_structural_center(self, structure_type)'
-        # If this fails move spot and try again
-        # if this coninues to fail scrap the map and start again
-        
-        def room_length(): ###
-            """ Define the length  of a room side."""
-            return random.randint(MIN_SIZE_ROOM, MAX_SIZE_ROOM) ###
-            
-        grid_max_x = lambda length: self.grid_h - length - 1 # 
-        grid_max_y = lambda length: self.grid_v - length - 1
-        
-        attempts = 0
-        valid_room = False
-        while not valid_room and MAX_ATTEMPTS >= attempts:
-            # cut the shapes in the room object
-            new_h = room_length()
-            new_v = room_length()
-            
-            max_x = grid_max_x(new_h)
-            max_y = grid_max_y(new_v)
-            new_value = random.randint(0,100)
-            
-            # Remeber the index starts at Zero: [0, 1, 2]
-            new_x = random.randint(1, max_x-1)
-            new_y = random.randint(1, max_y-1)
-            
-            # if room has two doors on different edges try build an extention.
-            room_component = Room(grid=self, value=new_value, doors=2, immovable_objects=1, room_objects=2)
-            map_object = Rect(new_x, new_y, new_h, new_v, room=room_component)
-            
-            if self.entry_point:
-                valid_room = (not any(created_room.intersect(map_object, steps_away=1) for created_room in rooms)) \
-                    and all(not map_object.rectangle(x, y) for x, y in self.entry_point)
-            else:
-                valid_room = not any(created_room.intersect(map_object, steps_away=1) for created_room in rooms)
-            attempts += 1
-            
-        if valid_structure:
-            return map_object
-            
-        return False
-
-    def place_walls(self):
+    def place_structures(self):
         for y in range(self.grid_h):
             for x in range(self.grid_v):
-                for map_object in self.structure:
+                for map_object in self.structures:
                     # Build Rooms
-                    if map_object.room:
-                        # Room with internal Walls
-                        if map_object.room.internal_structure and (x, y) in map_object.room.internal_structure:
+                    if map_object.building:
+                        # building with internal Walls
+                        if map_object.building.internal_structure and (x, y) in map_object.building.internal_structure:
                             self.grid[x][y].make_wall()
                             #self.grid[x][y].blocked = True
                             
-                        # Room without internal walls
-                        elif map_object.edges(x,y) and (x,y) not in map_object.room.door_space:
+                        # building without internal walls
+                        elif map_object.edges(x,y) and (x,y) not in map_object.building.door_space:
                             self.grid[x][y].make_wall()
                             #self.grid[x][y].blocked = True
                     
