@@ -9,8 +9,6 @@ DEFAULT_GRID_Y = 20
 MAX_ATTEMPTS = 20
 MAX_SIZE_ROOM = 6 # wall external max 7, internal max 5
 MIN_SIZE_ROOM = 3 # wall external min 4, internal min 2
-# Rooms with internal structures:
-#   5x5, 5x4
 ROOM_AREA = MAX_SIZE_ROOM * MAX_SIZE_ROOM
 WALKING_AREA = 0.70
 
@@ -18,8 +16,7 @@ OFFSETS = [(0, 1),(0, -1),(1, 0),(-1, 0)]
 DIAGONAL_OFFSETS = [(-1, -1),(1, -1),(1, 1),(-1, 1)]
 
 
-    
-    
+
 def trim_list(the_list, value, other_list):
     """ Given an ordered range and a number in that range.
     Split the list in two at the index of that value and return the larger of the resulting lists.
@@ -50,26 +47,14 @@ class Rect:
         y1:     the most-high y co-ord
         x2:     the most-right x co-ord
         y2:     the most-low y co-ord
-        area:   area encompassed by 'x1, x2, y1, y2'
         room:   the room component of the Rect
     """
     def __init__(self, building=None):
-        #Look into slightly roundifying rooms on length of edges
-        #   -------          --------
-        #   |     |          |      |
-        #   |     |  -->    /        \
-        #   |     |  -->   |          |
-        #   |     |  -->   |          |
-        #   |     |  -->    \        /
-        #   |     |          |      |
-        #   -------          --------
         h = self.rectangle_length()
-        limit_grid_x = lambda length: DEFAULT_GRID_X - length - 1
-        max_x = limit_grid_x(h)
-        
         v = self.rectangle_length()
-        limit_grid_y = lambda length: DEFAULT_GRID_Y - length - 1
-        max_y = limit_grid_y(v)    
+        
+        max_x = DEFAULT_GRID_X - h - 1
+        max_y = DEFAULT_GRID_Y - v - 1
     
         # Remeber the index starts at Zero: [0, 1, 2]
         x = random.randint(1, max_x-1)
@@ -79,7 +64,6 @@ class Rect:
         self.y1 = y
         self.x2 = x + h
         self.y2 = y + v
-        self.area = h * v
 
         self.building = building
         
@@ -119,8 +103,14 @@ class Rect:
             and self.x2 >= other_x1
             and self.y2 >= other_y1)
         
-    def rectangle(self, x, y):
-        return (self.x1 <= x <= self.x2 and self.y1 <= y <= self.y2)
+    def structure_space(self, x, y, steps_away=0):
+        _x1 = self.x1 - steps_away
+        _y1 = self.y1 - steps_away
+        _x2 = self.x2 + steps_away
+        _y2 = self.y2 + steps_away
+        
+        return (_x1 <= x <= _x2 
+            and _y1 <= y <= _y2)
 
     def internal(self, x, y):
         return (self.x1 < x < self.x2 and self.y1 < y < self.y2)
@@ -138,7 +128,14 @@ class Rect:
             or (self.y1 == y and self.x1 < x < self.x2) \
             or (self.y2 == y and self.x1 < x < self.x2)
 
-        
+"""
+class River:
+    def __init__(self):
+        find point on bottom x axis,
+        build towards top x axis,
+        find point on y axis build bridge
+"""
+
 class Building:
     """ A Building object that encompasses all the features of this map structure
     
@@ -210,9 +207,7 @@ class Building:
                 iv = random.choice(iv)
                 internal_structure = [(x, iv) for x in range(ix1, ix2)]
             
-            print len(internal_structure)
             internal_structure.remove(random.choice(internal_structure))
-            print len(internal_structure)
             self.internal_structure = internal_structure
 
     def clear_doorway(self, internal_space):
@@ -329,22 +324,10 @@ class Grid:
         self.first_grid = first_grid
         self.entry_point = entry_point
         self.create_grid()
-        """
-        Separate the map obejcts from the map
-            On creating the map append and search this space for possible locations.
-            
-            Build objects in free space by passing the grid into the objects (like 'house') structure or 'tree' structure
-            
-            House object should decide on the object type - depending on the space it receives
-            
-            have attempts to pick a space and a size. 
-        """
         
         # Above ground grid needs an external space attribute
-        # Space allocation
 
-        
-            
+
     def create_grid(self):
         self.grid = [[
             Tile(False)
@@ -356,6 +339,7 @@ class Grid:
         self.allocate_structures()
         self.build_structural_elements()
         self.place_structures()
+        self.externals()
         self.make_exit_point()
         
         
@@ -369,9 +353,9 @@ class Grid:
         self.medium_structures = 4
     
         grid_value = random.randint(0,100)
-        if grid_value > 80 and not self.first_grid:
+        if grid_value > 80: # and not self.first_grid:
             self.large_structures = 1
-            self.medium_structures = 1
+            self.medium_structures = 2
             
         
     def allocate_structures(self):
@@ -427,7 +411,7 @@ class Grid:
             if self.entry_point:
                 # needs to be GENERAL, not all contain rectangle
                 valid_structure = (not any(created_structure.intersect(map_object, steps_away=1) for created_structure in structures)) \
-                    and all(not map_object.rectangle(x, y) for x, y in self.entry_point)
+                    and all(not map_object.structure_space(x, y) for x, y in self.entry_point)
             else:
                 valid_structure = not any(created_structure.intersect(map_object, steps_away=1) for created_structure in structures)
             attempts += 1
@@ -447,39 +431,35 @@ class Grid:
         if self.first_grid:
             self.structures[0].building.users_start()
             
+
+    def externals(self):
+        grid = [(x, y) for y in range(self.grid_h) for x in range(self.grid_v)]
+        for map_object in self.structures: 
+            grid = [(x, y) for (x, y) in grid if not map_object.structure_space(x, y, 1)]
+    
+        self.external_area = grid
             
     def make_exit_point(self):
-        possible_space = []
-        for y in range(self.grid_h):
-            for x in range(self.grid_v):
-                if not self.grid[x][y].blocked:
-                    possible_space.append((x, y))    
-        
-        selected_index = random.randint(1, len(possible_space) - 1)
-        
-        self.exit_point = possible_space[selected_index]
+        selected_index = random.randint(1, len(self.external_area) - 1)
+        self.exit_point = self.external_area[selected_index]
 
 
     def place_structures(self):
         for y in range(self.grid_h):
             for x in range(self.grid_v):
                 for map_object in self.structures:
-                    # Build Rooms
+
                     if map_object.building:
-                        # building with internal Walls
                         if map_object.building.internal_structure and (x, y) in map_object.building.internal_structure:
                             self.grid[x][y].make_wall()
-                            #self.grid[x][y].blocked = True
-                            
-                        # building without internal walls
+
                         elif map_object.edges(x,y) and (x,y) not in map_object.building.door_space:
                             self.grid[x][y].make_wall()
-                            #self.grid[x][y].blocked = True
                     
                     elif map_object.river:
                         if (x, y) in map_object.river.space:
                             self.grid[x][y].make_river()
-                            
+
                     elif map_object.bridge:
                         if (x, y) in map_object.bridge.space:
                             self.grid[x][y].make_bridge()
