@@ -128,6 +128,71 @@ class Rect:
             or (self.y1 == y and self.x1 < x < self.x2) \
             or (self.y2 == y and self.x1 < x < self.x2)
 
+
+class SinglePoint:
+    def __init__(self, tree=None):
+        # Horizontal and Vertical Size of Structure
+        h = 1
+        v = 1
+        max_x = DEFAULT_GRID_X - h - 1
+        max_y = DEFAULT_GRID_Y - v - 1
+    
+        # Remeber the index starts at Zero: [0, 1, 2]
+        x = random.randint(1, max_x-1)
+        y = random.randint(1, max_y-1)
+        self.x1 = x
+        self.x2 = x
+        self.y1 = y
+        self.y2 = y
+        
+        self.tree = tree
+        
+        if self.tree:
+            self.tree.owner = self        
+    
+    
+    def intersect(self, other, steps_away=0):
+        """ Defines the space that would be intercecting this structure
+        
+        :param map_object: another map_object.
+        :param steps_away: the steps away that conclude intersection.
+        """
+        other_x1 = other.x1 - steps_away
+        other_y1 = other.y1 - steps_away
+        other_x2 = other.x2 + steps_away
+        other_y2 = other.y2 + steps_away
+        
+        return (self.x1 <= other_x2
+            and self.y1 <= other_y2
+            and self.x2 >= other_x1
+            and self.y2 >= other_y1)
+        
+        
+    def structure_space(self, x, y, steps_away=0):
+        """ Defines all space for this structure
+        
+        :param steps_away: the steps away that conclude intersection.
+        """
+        _x1 = self.x1 - steps_away
+        _y1 = self.y1 - steps_away
+        _x2 = self.x2 + steps_away
+        _y2 = self.y2 + steps_away
+        
+        return (_x1 <= x <= _x2 
+            and _y1 <= y <= _y2)
+        
+
+    def build_element(self, new_value):
+        """ Call the function after positions have been finalized in order to build the rest of the structure.
+        
+        :param new_value: the value of the structure to build.
+        :param self.grid: the grid on which the structure
+        """
+        #self.room.owner = self
+        self.tree = Tree(value=new_value)
+        self.tree.owner = self
+        
+
 """
 class River:
     def __init__(self):
@@ -135,8 +200,18 @@ class River:
         build towards top x axis,
         find point on y axis build bridge
 """
+class Tree:
+    """ A Tree object that is used as an example of a simple structure on the map.
+    """
+    def __init__(self, value=10):
+        self.value = value
+        
+        grid_h = range(DEFAULT_GRID_X)
+        grid_v = range(DEFAULT_GRID_Y)
+        self.grid_space = [(x, y) for x in grid_h for y in grid_v]    
+    
 
-class Building:
+class Building(Rect):
     """ A Building object that encompasses all the features of this map structure
     
     :attributes:
@@ -294,6 +369,10 @@ class Tile:
         self.blocked = False
         self.portray = '='
 
+    def make_tree(self):
+        self.wall_tile = False
+        self.blocked = True
+        self.portray = 'T'
         # when I move to gui this will become important
         # self.block_sight = True
         
@@ -352,7 +431,8 @@ class Grid:
         self.large_structures = 0
         self.medium_structures = 4
     
-        grid_value = random.randint(0,100)
+        # grid_value = random.randint(0,100)
+        grid_value = 100
         if grid_value > 80: # and not self.first_grid:
             self.large_structures = 1
             self.medium_structures = 2
@@ -365,19 +445,6 @@ class Grid:
         ###self.biome_structures = BIOME_DATA[self.biome]
         
         self.structures = []
-        
-        completed_large_structures = 0
-        while completed_large_structures < self.large_structures:
-            new_structure = self.validate_structure('building', self.structures)
-
-            if new_structure == False:
-                self.structures = []
-                completed_large_structures = 0
-                print 'Map Rejected'
-            
-            else:
-                completed_large_structures += 1
-                self.structures.append(new_structure)
                 
         completed_medium_structures = 0
         while completed_medium_structures < self.medium_structures:
@@ -390,6 +457,19 @@ class Grid:
             
             else:
                 completed_medium_structures += 1
+                self.structures.append(new_structure)
+        
+        completed_large_structures = 0
+        while completed_large_structures < self.large_structures:
+            new_structure = self.validate_structure('tree', self.structures)
+
+            if new_structure == False:
+                self.structures = []
+                completed_large_structures = 0
+                print 'Map Rejected'
+            
+            else:
+                completed_large_structures += 1
                 self.structures.append(new_structure)
                 
         print self.structures
@@ -407,6 +487,9 @@ class Grid:
             if structure_type == 'building':
                 map_object = Rect()
 
+            if structure_type == 'tree':
+                map_object = SinglePoint()
+                
             # Define the valid structure
             if self.entry_point:
                 # needs to be GENERAL, not all contain rectangle

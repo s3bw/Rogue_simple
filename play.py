@@ -23,10 +23,10 @@ def render_map(printing_stats):
         if object != user:
             object.draw()
         
-        if not object.storage:
-            print (object.x, object.y), object.name, object.representation
-        else:
-            print (object.x, object.y), object.name, object.representation, object.storage.remaining_capacity, object.storage.max_capacity
+        #if not object.storage:
+          #  print (object.x, object.y), object.name, object.representation
+        #else:
+          #  print (object.x, object.y), object.name, object.representation, object.storage.remaining_capacity, object.storage.max_capacity
 
     user.draw()
     current_area.show()
