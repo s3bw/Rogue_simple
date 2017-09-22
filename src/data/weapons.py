@@ -205,3 +205,60 @@ Melee_Weapon_Data = {
         "size": 9
     }
 }
+
+Range_Weapon_Data = {
+	"heavy_bow": {
+		"mat_types": ["metal"],
+		"notable": "BOWlder",
+		"size_string": "long",
+        	"pierce_trauma": 0.8,
+        	"blunt_trauma": 0.7,
+        	"type": "bow",
+        	"size": 8
+	},
+	"light_bow": {
+		"mat_types": ["wood"],
+        	"notable": "robinhood",
+        	"size_string": "long",
+        	"pierce_trauma": 0.8,
+        	"blunt_trauma": 0.2,
+        	"type": "bow",
+        	"size": 4
+	},
+	"crossbow": {
+		"mat_types": ["metal"],
+        	"notable": "BOWlder",
+        	"size_string": "long",
+        	"pierce_trauma": 0.9,
+        	"blunt_trauma": 0.3,
+        	"type": "bow",
+        	"size": 3
+	},
+	"slingshot": {
+		"mat_types": ["wood"],
+        	"notable": "birds_eye",
+        	"size_string": "long",
+        	"pierce_trauma": 0.1,
+        	"blunt_trauma": 0.2,
+        	"type": "bow",
+        	"size": 1
+	},
+	"ninja_dart": {
+		"mat_types": ["metal"],
+        	"notable": "bo_shuriken",
+        	"size_string": "short",
+        	"pierce_trauma": 0.8,
+        	"blunt_trauma": 0.1,
+        	"type": "dagger",
+        	"size": 1
+	},
+	"archilles": {
+		"mat_types": ["wood"],
+        	"notable": "archilles' bow",
+        	"size_string": "long",
+        	"pierce_trauma": 0.5,
+       	 	"blunt_trauma": 0.4,
+        	"type": "bow",
+        	"size": 5
+	}
+}
